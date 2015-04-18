@@ -18,7 +18,9 @@ var browserActionBtn;
 const overrides = require("./overrides");
 
 if (manifest.background) {
-  backgroundPage = background.create(manifest.background);
+  let options = JSON.parse(JSON.stringify(manifest.background));
+  options.scripts = (Array.isArray(options.scripts) ? options.scripts : []).map(script => getURL(script));
+  backgroundPage = background.create(options);
   console.log("Created background page!");
 }
 

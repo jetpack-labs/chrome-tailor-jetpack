@@ -18,6 +18,5 @@
   "author": "Erik Vold",
   "license": "MPL 2",
   "dependencies": {
-    "bluebird": "2.9.24"
   }
 }

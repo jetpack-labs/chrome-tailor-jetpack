@@ -11,7 +11,7 @@ const setupChromeAPI = require("./lib/chrome-api-parent").setup;
 
 function create(options) {
   let pageURL = options.page ? getURL(options.page) : self.data.url("default-background.html");
-  let scripts = (options.scripts || []).map(script => getURL(script));
+  let scripts = (options.scripts || []);
   let contentScripts = [ self.data.url("chrome-api-child.js") ].concat(scripts);
   console.log(contentScripts)
 
