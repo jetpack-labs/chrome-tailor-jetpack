@@ -10,18 +10,25 @@ const { cleanUI } = require("sdk/test/utils");
 
 exports["test chrome.tabs.create"] = function(assert, done) {
   var worker;
+  var title = "Tab To Duplicate";
   var i = 1;
-  tabs.on("load", function wait(tab) {
-    assert.equal(tab.title, "Created Tab " + i++);
-    if (i > 2) {
-      tabs.removeListener("load", wait);
-      worker.destroy();
-      cleanUI().then(done);
-    }
-  });
 
-  worker = background.create({
-    scripts: fixtures.url("chrome.tabs.create.js"),
+  tabs.open({
+    url: "data:text/html;charset=utf-8,<title>" + title + "</title>",
+    onLoad: () => {
+      tabs.on("load", function wait(tab) {
+        assert.equal(tab.title, title);
+        if (i++ >= 3) {
+          tabs.removeListener("load", wait);
+          worker.destroy();
+          cleanUI().then(done);
+        }
+      });
+
+      worker = background.create({
+        scripts: fixtures.url("chrome.tabs.duplicate.js"),
+      });
+    }
   });
 }
 
