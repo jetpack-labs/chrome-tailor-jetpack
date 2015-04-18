@@ -8,9 +8,9 @@ const background = require("../background");
 const fixtures = require("./fixtures");
 const { cleanUI } = require("sdk/test/utils");
 
-exports["test chrome.tabs.duplicate"] = function(assert, done) {
+exports["test chrome.tabs.getCurrent"] = function(assert, done) {
   var worker;
-  var title = "Tab To Duplicate";
+  var title = "Tab Current Test";
   var i = 1;
 
   tabs.open({
