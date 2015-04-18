@@ -9,6 +9,7 @@ const { getURL } = require("./crx");
 // the chrome extension data is in data/crx
 const manifest = require("./data/crx/manifest.json");
 
+const contentScripts = require("./content-scripts");
 const background = require("./background");
 var backgroundPage;
 
@@ -32,4 +33,8 @@ if (manifest.browser_action) {
 if (manifest.chrome_url_overrides) {
   overrides.setup(manifest.chrome_url_overrides);
   console.log("Overrides completed!");
+}
+
+if (manifest.content_scripts) {
+  manifest.content_scripts.forEach(def => contentScripts.create(def));
 }
