@@ -45,7 +45,6 @@ function create(options) {
             }
           }, 500)
         });
-        lastPanel = panel;
 
         setup({ target: panel });
 
