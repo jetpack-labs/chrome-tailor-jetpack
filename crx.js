@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 "use strict";
 
-const contentScripts = require("./content-scripts");
-const background = require("./background");
-const browserAction = require("./browser_action");
-const overrides = require("./overrides");
+const contentScripts = require("./manifest-actions/content_scripts");
+const background = require("./manifest-actions/background");
+const browserAction = require("./manifest-actions/browser_action");
+const overrides = require("./manifest-actions/chrome_url_overrides");
 
 function load(options) {
   const rootURI = options.rootURI;
@@ -27,7 +27,7 @@ function load(options) {
     }
     options.rootURI = rootURI;
 
-    backgroundPage = background.create(options);
+    backgroundPage = background(options);
   }
 
   if (manifest.browser_action) {
@@ -36,7 +36,7 @@ function load(options) {
     options.default_icon = getURL(options.default_icon);
     options.rootURI = rootURI;
 
-    browserActionBtn = browserAction.create(options);
+    browserActionBtn = browserAction(options);
   }
 
   if (manifest.chrome_url_overrides) {
@@ -46,7 +46,7 @@ function load(options) {
     }
     options.rootURI = rootURI;
 
-    overrides.setup(options);
+    overrides(options);
   }
 
   if (manifest.content_scripts) {
@@ -60,7 +60,7 @@ function load(options) {
         options.css = options.css.map(getURL);
       }
 
-      contentScriptMod = contentScripts.create(options)
+      contentScriptMod = contentScripts(options)
     });
   }
 

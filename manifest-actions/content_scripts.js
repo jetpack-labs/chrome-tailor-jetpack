@@ -5,8 +5,8 @@
 
 const self = require("sdk/self");
 const { PageMod } = require("sdk/page-mod");
-const { convertPattern } = require("./lib/content-script-utils");
-const setupChromeAPI = require("./lib/chrome-api-parent").setup;
+const { convertPattern } = require("../lib/content-script-utils");
+const setupChromeAPI = require("../lib/chrome-api-parent").setup;
 
 /**
  * Translates a `content_script` entry in a manifest.json into
@@ -70,4 +70,5 @@ function create ({ matches, exclude_matches, match_about_blank, css, js, run_at,
 
   return mod;
 }
-exports.create = create;
+
+module.exports = create;

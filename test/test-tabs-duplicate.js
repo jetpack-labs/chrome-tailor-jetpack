@@ -4,7 +4,7 @@
 "use strict";
 
 const tabs = require("sdk/tabs");
-const background = require("../background");
+const background = require("../manifest-actions/background");
 const fixtures = require("./fixtures");
 const { cleanUI } = require("sdk/test/utils");
 
@@ -25,7 +25,7 @@ exports["test chrome.tabs.duplicate"] = function(assert, done) {
         }
       });
 
-      worker = background.create({
+      worker = background({
         scripts: fixtures.url("chrome.tabs.duplicate.js"),
       });
     }

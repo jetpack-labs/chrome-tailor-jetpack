@@ -9,7 +9,7 @@ const { Panel } = require("sdk/panel");
 const { setTimeout } = require("sdk/timers");
 const { emit, on, off } = require('sdk/event/core');
 
-const { setup, emitter } = require("./lib/chrome-api-parent");
+const { setup, emitter } = require("../lib/chrome-api-parent");
 
 function create(options) {
   let icon = options.default_icon || "";
@@ -45,4 +45,4 @@ function create(options) {
 
   return button;
 }
-exports.create = create;
+module.exports = create;
