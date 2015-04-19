@@ -10,7 +10,9 @@ var tabs = createObjectIn(chrome, { defineAs: "tabs" });
 var extension = createObjectIn(chrome, { defineAs: "extension" });
 var history = createObjectIn(chrome, { defineAs: "history" });
 var topSites = createObjectIn(chrome, { defineAs: "topSites" });
+
 var runtime = createObjectIn(chrome, { defineAs: "runtime" });
+var onMessage = createObjectIn(runtime, { defineAs: "onMessage" });
 
 var browserAction = createObjectIn(chrome, { defineAs: "browserAction" });
 var onClicked = createObjectIn(browserAction, { defineAs: "onClicked" });
@@ -203,7 +205,7 @@ function runtimeOnMessage(callback) {
     runtimeCallbacks.push(callback);
   }
 }
-exportFunction(runtimeOnMessage, runtime, { defineAs: "onMessage" });
+exportFunction(runtimeOnMessage, onMessage, { defineAs: "addListener" });
 
 // END: chrome.runtime.*
 

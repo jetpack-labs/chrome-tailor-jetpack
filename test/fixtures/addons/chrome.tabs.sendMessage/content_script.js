@@ -3,6 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 "use strict";
 
-chrome.runtime.onMessage(function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   sendResponse("DONE " + message.title);
 })
