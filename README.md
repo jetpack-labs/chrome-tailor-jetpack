@@ -1,4 +1,4 @@
-# chrome-tailor-jetpack
+# chrome-tailor-jetpack [![Build Status](https://travis-ci.org/jetpack-labs/chrome-tailor-jetpack.png)](https://travis-ci.org/jetpack-labs/chrome-tailor-jetpack)
 
 Skeleton Firefox extension that can run a Chrome extension.
 
