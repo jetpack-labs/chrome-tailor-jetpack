@@ -4,5 +4,5 @@
 "use strict";
 
 chrome.runtime.onMessage(function(message, sender, sendResponse) {
-  sendResponse("DONE MESSAGE TEST");
+  sendResponse("DONE " + message.title);
 })
