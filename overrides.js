@@ -32,7 +32,7 @@ function setup(options) {
       contentScriptWhen: "start",
       contentScriptFile: self.data.url("chrome-api-child.js"),
       contentScriptOptions: {
-        rootURI: getURL("")
+        rootURI: options.rootURI
       },
       onAttach: (mod) => {
         setupChromeAPI({ target: mod });

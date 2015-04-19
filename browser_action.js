@@ -8,7 +8,6 @@ const { ActionButton } = require("sdk/ui/button/action");
 const { Panel } = require("sdk/panel");
 const { setTimeout } = require("sdk/timers");
 const { emit, on, off } = require('sdk/event/core');
-const { getURL } = require("./crx");
 
 const { setup, emitter } = require("./lib/chrome-api-parent");
 
@@ -20,15 +19,15 @@ function create(options) {
   let button = ActionButton({
     id: "my-button",
     label: label,
-    icon: getURL(icon),
+    icon: icon,
     onClick: function(state) {
       if (url) {
         let panel = Panel({
-          contentURL: getURL(url),
+          contentURL: url,
           contentScriptWhen: "start",
           contentScriptFile: self.data.url("chrome-api-child.js"),
           contentScriptOptions: {
-            rootURI: getURL("")
+            rootURI: options.rootURI
           },
           onHide: () => setTimeout(() => panel.destroy(), 500)
         });

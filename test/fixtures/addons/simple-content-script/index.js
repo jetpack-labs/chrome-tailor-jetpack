@@ -3,10 +3,4 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 "use strict";
 
-const self = require("sdk/self");
-const { load } = require("./crx");
-
-var rootURI = self.data.url("/crx/");
-var crx = load({
-  rootURI: rootURI
-});
+window.document.title = "TEST";

@@ -10,17 +10,16 @@ const { getURL } = require("./crx");
 const setupChromeAPI = require("./lib/chrome-api-parent").setup;
 
 function create(options) {
-  let pageURL = options.page ? getURL(options.page) : self.data.url("default-background.html");
+  let pageURL = options.page || self.data.url("default-background.html");
   let scripts = (options.scripts || []);
   let contentScripts = [ self.data.url("chrome-api-child.js") ].concat(scripts);
-  console.log(contentScripts)
 
   var backgroundPage = pageWorker.Page({
     contentURL: pageURL,
     contentScriptWhen: "start",
     contentScriptFile: [ self.data.url("chrome-api-child.js") ].concat(scripts),
     contentScriptOptions: {
-      rootURI: getURL("")
+      rootURI: options.rootURI
     }
   });
 
