@@ -7,6 +7,7 @@ const contentScripts = require("./manifest-actions/content_scripts");
 const background = require("./manifest-actions/background");
 const browserAction = require("./manifest-actions/browser_action");
 const overrides = require("./manifest-actions/chrome_url_overrides");
+const events = require("sdk/system/events");
 
 function load(options) {
   const rootURI = options.rootURI;
@@ -66,9 +67,12 @@ function load(options) {
 
   return {
     unload: function() {
-      backgroundPage && backgroundPage.destroy();
-      browserActionBtn && browserActionBtn.destroy();
-      contentScriptMod && contentScriptMod.destroy();
+      events.emit("crx-unload", {
+        subject: {
+          name: manifest.name
+        }
+      });
+
       // TODO: close all overriden pages
     }
   }

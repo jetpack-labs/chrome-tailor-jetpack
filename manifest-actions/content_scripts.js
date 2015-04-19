@@ -8,6 +8,7 @@ const { PageMod } = require("sdk/page-mod");
 const { convertPattern } = require("../lib/content-script-utils");
 const { setup: setupChromeAPI, emitter, getTabID } = require("../lib/chrome-api-parent");
 const { emit, on, off } = require('sdk/event/core');
+const events = require("sdk/system/events");
 
 /**
  * Translates a `content_script` entry in a manifest.json into
@@ -60,6 +61,8 @@ function create (options) {
              run_at === "document_end" ? "ready" :
              "end";
 
+  let manifest = require(options.rootURI + "manifest.json");
+
   let mod = PageMod({
     include: include,
     contentScriptFile: scripts,
@@ -67,7 +70,7 @@ function create (options) {
     contentScriptWhen: when,
     contentScriptOptions: {
       rootURI: options.rootURI,
-      manifest: require(options.rootURI + "manifest.json")
+      manifest: manifest
     },
     attachTo: attachTo,
     exclude: exclude,
@@ -89,6 +92,14 @@ function create (options) {
       })
     }
   });
+
+  function unloadWait(event) {
+    if (event.subject.name == manifest.name) {
+      mod.destroy();
+      events.off("crx-unload", unloadWait, true);
+    }
+  }
+  events.on("crx-unload", unloadWait, true);
 
   return mod;
 }
