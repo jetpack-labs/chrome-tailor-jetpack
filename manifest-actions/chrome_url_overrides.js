@@ -6,10 +6,10 @@
 const self = require("sdk/self");
 const { get, set } = require("sdk/preferences/service");
 const { PageMod } = require("sdk/page-mod");
-const { getURL } = require("./crx");
+const { getURL } = require("../crx");
 const { when: unload } = require("sdk/system/unload");
 
-const { setup: setupChromeAPI } = require("./lib/chrome-api-parent");
+const { setup: setupChromeAPI } = require("../lib/chrome-api-parent");
 
 function setup(options) {
   var newtab = options.newtab;
@@ -40,4 +40,4 @@ function setup(options) {
     });
   }
 }
-exports.setup = setup;
+module.exports = setup;

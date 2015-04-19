@@ -9,3 +9,5 @@ function getURL(path) {
   return self.data.url("./crx/" + path);
 }
 exports.getURL = getURL;
+
+exports.manifest = require("./data/crx/manifest.json");

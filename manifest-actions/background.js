@@ -5,20 +5,19 @@
 
 const self = require("sdk/self");
 const pageWorker = require("sdk/page-worker");
-const { getURL } = require("./crx");
+const { getURL } = require("../crx");
 
-const setupChromeAPI = require("./lib/chrome-api-parent").setup;
+const setupChromeAPI = require("../lib/chrome-api-parent").setup;
 
 function create(options) {
+
   let pageURL = options.page ? getURL(options.page) : self.data.url("default-background.html");
-  let scripts = (options.scripts || []);
-  let contentScripts = [ self.data.url("chrome-api-child.js") ].concat(scripts);
-  console.log(contentScripts)
+  let contentScripts = [ self.data.url("chrome-api-child.js") ].concat([].concat(options.scripts).map(getURL));
 
   var backgroundPage = pageWorker.Page({
     contentURL: pageURL,
     contentScriptWhen: "start",
-    contentScriptFile: [ self.data.url("chrome-api-child.js") ].concat(scripts),
+    contentScriptFile: contentScripts,
     contentScriptOptions: {
       rootURI: getURL("")
     }
@@ -28,4 +27,4 @@ function create(options) {
 
   return backgroundPage;
 }
-exports.create = create;
+module.exports = create;

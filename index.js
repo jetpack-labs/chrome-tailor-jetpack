@@ -5,36 +5,7 @@
 
 const self = require("sdk/self");
 const { getURL } = require("./crx");
+const executeManifestActions = require("./manifest");
 
-// the chrome extension data is in data/crx
-const manifest = require("./data/crx/manifest.json");
-
-const contentScripts = require("./content-scripts");
-const background = require("./background");
-var backgroundPage;
-
-const browserAction = require("./browser_action");
-var browserActionBtn;
-
-const overrides = require("./overrides");
-
-if (manifest.background) {
-  let options = JSON.parse(JSON.stringify(manifest.background));
-  options.scripts = (Array.isArray(options.scripts) ? options.scripts : []).map(script => getURL(script));
-  backgroundPage = background.create(options);
-  console.log("Created background page!");
-}
-
-if (manifest.browser_action) {
-  browserActionBtn = browserAction.create(manifest.browser_action);
-  console.log("Created browser_action!");
-}
-
-if (manifest.chrome_url_overrides) {
-  overrides.setup(manifest.chrome_url_overrides);
-  console.log("Overrides completed!");
-}
-
-if (manifest.content_scripts) {
-  manifest.content_scripts.forEach(def => contentScripts.create(def));
-}
+// Execute manifest actions
+executeManifestActions();

@@ -5,9 +5,13 @@
 
 const self = require("sdk/self");
 const { PageMod } = require("sdk/page-mod");
-const { getURL } = require("./crx");
-const { convertPattern } = require("./lib/content-script-utils");
-const setupChromeAPI = require("./lib/chrome-api-parent").setup;
+const { getURL } = require("../crx");
+const { convertPattern } = require("../lib/content-script-utils");
+const setupChromeAPI = require("../lib/chrome-api-parent").setup;
+
+function setup (scripts) {
+  return (scripts || []).map(create);
+}
 
 /**
  * Translates a `content_script` entry in a manifest.json into
@@ -71,4 +75,4 @@ function create ({ matches, exclude_matches, match_about_blank, css, js, run_at,
 
   return mod;
 }
-exports.create = create;
+module.exports = setup;
