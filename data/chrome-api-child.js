@@ -10,6 +10,7 @@ var tabs = createObjectIn(chrome, { defineAs: "tabs" });
 var extension = createObjectIn(chrome, { defineAs: "extension" });
 var history = createObjectIn(chrome, { defineAs: "history" });
 var topSites = createObjectIn(chrome, { defineAs: "topSites" });
+var runtime = createObjectIn(chrome, { defineAs: "runtime" });
 
 var browserAction = createObjectIn(chrome, { defineAs: "browserAction" });
 var onClicked = createObjectIn(browserAction, { defineAs: "onClicked" });
@@ -161,6 +162,18 @@ function setUpdateUrlData(data) {
 exportFunction(setUpdateUrlData, extension, { defineAs: "setUpdateUrlData" });
 
 extension.inIncognitoContext = false;
+
+// END: chrome.extension.*
+
+
+// START: chrome.history.*
+
+exportFunction(extGetURL, runtime, { defineAs: "getURL" });
+
+function getCRXManifest() {
+  return self.options.manifest;
+}
+exportFunction(getCRXManifest, runtime, { defineAs: "getManifest" });
 
 // END: chrome.extension.*
 

@@ -4,26 +4,22 @@
 "use strict";
 
 const tabs = require("sdk/tabs");
-const background = require("../manifest-actions/background");
 const fixtures = require("./fixtures");
 const { cleanUI } = require("sdk/test/utils");
 
-exports["test chrome.tabs.create"] = function(assert, done) {
-  var worker;
-  var i = 1;
+const { load } = require("../crx");
+
+exports["test runtime getManifest"] = function(assert, done) {
   tabs.on("load", function wait(tab) {
-    assert.equal(tab.title, "Created Tab " + i++);
-    if (i > 2) {
+    if (tab.title == "chrome.runtime.getManifest") {
+      assert.pass("the expected tab was created");
       tabs.removeListener("load", wait);
-      worker.destroy();
+      unload();
       cleanUI().then(done);
     }
-  });
+  })
 
-  worker = background({
-    scripts: fixtures.url("chrome.tabs.create.js"),
-    rootURI: fixtures.url("addons/chrome.runtime.getManifest/")
-  });
+  let { unload } = load({ rootURI: fixtures.url("addons/chrome.runtime.getManifest/") });
 }
 
 require('sdk/test').run(exports);

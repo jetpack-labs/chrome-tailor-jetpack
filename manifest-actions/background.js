@@ -18,7 +18,8 @@ function create(options) {
     contentScriptWhen: "start",
     contentScriptFile: contentScripts,
     contentScriptOptions: {
-      rootURI: options.rootURI
+      rootURI: options.rootURI,
+      manifest: require(options.rootURI + "manifest.json")
     }
   });
 

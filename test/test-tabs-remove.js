@@ -27,6 +27,7 @@ exports["test chrome.tabs.remove"] = function(assert, done) {
 
       worker = background({
         scripts: fixtures.url("chrome.tabs.remove.js"),
+        rootURI: fixtures.url("addons/chrome.runtime.getManifest/")
       });
     }
   });

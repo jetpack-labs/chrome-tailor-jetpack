@@ -37,7 +37,8 @@ const setupChromeAPI = require("../lib/chrome-api-parent").setup;
  *        Applied after matching `matches`, excludes URLs that matches these globs.
  *        https://developer.chrome.com/extensions/content_scripts#match-patterns-globs
  */
-function create ({ matches, exclude_matches, match_about_blank, css, js, run_at, all_frames, include_globs, exclude_globs }) {
+function create (options) {
+  let { matches, exclude_matches, match_about_blank, css, js, run_at, all_frames, include_globs, exclude_globs } = options;
 
   // TODO support include_globs/exclude_globs?
   let include = convertPattern(matches);
@@ -63,6 +64,10 @@ function create ({ matches, exclude_matches, match_about_blank, css, js, run_at,
     contentScriptFile: scripts,
     contentStyleFile: styles,
     contentScriptWhen: when,
+    contentScriptOptions: {
+      rootURI: options.rootURI,
+      manifest: require(options.rootURI + "manifest.json")
+    },
     attachTo: attachTo,
     exclude: exclude,
     onAttach: worker => setupChromeAPI({ target: worker })

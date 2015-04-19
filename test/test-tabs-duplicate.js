@@ -27,6 +27,7 @@ exports["test chrome.tabs.duplicate"] = function(assert, done) {
 
       worker = background({
         scripts: fixtures.url("chrome.tabs.duplicate.js"),
+        rootURI: fixtures.url("addons/chrome.runtime.getManifest/")
       });
     }
   });

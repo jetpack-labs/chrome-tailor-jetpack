@@ -27,7 +27,8 @@ function create(options) {
           contentScriptWhen: "start",
           contentScriptFile: self.data.url("chrome-api-child.js"),
           contentScriptOptions: {
-            rootURI: options.rootURI
+            rootURI: options.rootURI,
+            manifest: require(options.rootURI + "manifest.json")
           },
           onHide: () => setTimeout(() => panel.destroy(), 500)
         });
