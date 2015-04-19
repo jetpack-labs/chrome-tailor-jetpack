@@ -166,7 +166,7 @@ extension.inIncognitoContext = false;
 // END: chrome.extension.*
 
 
-// START: chrome.history.*
+// START: chrome.runtime.*
 
 exportFunction(extGetURL, runtime, { defineAs: "getURL" });
 
@@ -175,7 +175,7 @@ function getCRXManifest() {
 }
 exportFunction(getCRXManifest, runtime, { defineAs: "getManifest" });
 
-// END: chrome.extension.*
+// END: chrome.runtime.*
 
 
 // START: chrome.history.*
