@@ -22,9 +22,9 @@ APIs supported from the [Chrome extension API](https://developer.chrome.com/exte
   * `addUrl`, `deleteAll`, `deleteUrl` supported
   * More detailed needed for models used here
 * [chrome.runtime](https://developer.chrome.com/extensions/runtime)
-  * `getURL`, `getManifest`
+  * `getURL`, `getManifest`, `onMessage`
 * [chrome.tabs](https://developer.chrome.com/extensions/tabs)
-  * `create`, `duplicate`, `executeScript`, `getCurrent`, `query`, `remove`
+  * `create`, `duplicate`, `executeScript`, `getCurrent`, `query`, `remove`, `sendMessage`
 
 #### Not Yet Supported
 

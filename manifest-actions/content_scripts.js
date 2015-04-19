@@ -6,7 +6,8 @@
 const self = require("sdk/self");
 const { PageMod } = require("sdk/page-mod");
 const { convertPattern } = require("../lib/content-script-utils");
-const setupChromeAPI = require("../lib/chrome-api-parent").setup;
+const { setup: setupChromeAPI, emitter, getTabID } = require("../lib/chrome-api-parent");
+const { emit, on, off } = require('sdk/event/core');
 
 /**
  * Translates a `content_script` entry in a manifest.json into
@@ -70,7 +71,23 @@ function create (options) {
     },
     attachTo: attachTo,
     exclude: exclude,
-    onAttach: worker => setupChromeAPI({ target: worker })
+    onAttach: worker => {
+      setupChromeAPI({ target: worker });
+
+      function tabsSendMessage(data) {
+        var tabId = data.tabId;
+        if (!worker.tab) {
+          return null;
+        }
+        if (getTabID(worker.tab) == tabId) {
+          worker.port.emit("tabs:send:message", data);
+        }
+      }
+      on(emitter, "tabs:send:message", tabsSendMessage);
+      worker.once("detach", () => {
+        off(emitter, "tabs:send:message", tabsSendMessage);
+      })
+    }
   });
 
   return mod;

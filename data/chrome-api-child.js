@@ -135,7 +135,77 @@ function tabsExecuteScript(tabId, details, callback) {
 }
 exportFunction(tabsExecuteScript, tabs, { defineAs: "executeScript" });
 
+function tabsSendMessage(tabId, message, options, callback) {
+  var queryID = id++;
+  if (typeof options == "function") {
+    callback = options;
+    options = null;
+  }
+
+  self.port.on("tabs:got:message", function wait(data) {
+    if (data.id == queryID) {
+      self.port.removeListener("tabs:got:message", wait);
+      // TODO: implement results
+      callback && callback(data.result);
+    }
+    return null;
+  });
+
+  self.port.emit("tabs:send:message", {
+    id: queryID,
+    tabId: tabId,
+    message: message
+  });
+}
+exportFunction(tabsSendMessage, tabs, { defineAs: "sendMessage" });
+
+let runtimeCallbacks = [];
+self.port.on("tabs:send:message", function(data) {
+  var responseMade = false;
+  function sendResponse(result) {
+    if (responseMade) {
+      return null;
+    }
+    responseMade = true;
+    self.port.emit("tabs:message:response", {
+      id: data.id,
+      result: result
+    })
+  }
+
+  var MessageSender = {};
+  if (data.tabId) {
+    MessageSender.tab = {
+      id: data.tabId
+    };
+  }
+
+  runtimeCallbacks.forEach(cb => {
+    cb(cleanse(data.message), cleanse(MessageSender), sendResponse);
+  });
+});
+
+
 // END: chrome.tabs.*
+
+
+// START: chrome.runtime.*
+
+exportFunction(extGetURL, runtime, { defineAs: "getURL" });
+
+function getCRXManifest() {
+  return self.options.manifest;
+}
+exportFunction(getCRXManifest, runtime, { defineAs: "getManifest" });
+
+function runtimeOnMessage(callback) {
+  if (typeof callback == "function") {
+    runtimeCallbacks.push(callback);
+  }
+}
+exportFunction(runtimeOnMessage, runtime, { defineAs: "onMessage" });
+
+// END: chrome.runtime.*
 
 
 // START: chrome.extension.*
@@ -164,18 +234,6 @@ exportFunction(setUpdateUrlData, extension, { defineAs: "setUpdateUrlData" });
 extension.inIncognitoContext = false;
 
 // END: chrome.extension.*
-
-
-// START: chrome.runtime.*
-
-exportFunction(extGetURL, runtime, { defineAs: "getURL" });
-
-function getCRXManifest() {
-  return self.options.manifest;
-}
-exportFunction(getCRXManifest, runtime, { defineAs: "getManifest" });
-
-// END: chrome.runtime.*
 
 
 // START: chrome.history.*
