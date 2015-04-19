@@ -21,6 +21,8 @@ APIs supported from the [Chrome extension API](https://developer.chrome.com/exte
 * [chrome.history](https://developer.chrome.com/extensions/history)
   * `addUrl`, `deleteAll`, `deleteUrl` supported
   * More detailed needed for models used here
+* [chrome.runtime](https://developer.chrome.com/extensions/runtime)
+  * `getURL`, `getManifest`
 * [chrome.tabs](https://developer.chrome.com/extensions/tabs)
   * `create`, `duplicate`, `executeScript`, `getCurrent`, `query`, `remove`
 
@@ -60,7 +62,6 @@ APIs supported from the [Chrome extension API](https://developer.chrome.com/exte
 * [chrome.power](https://developer.chrome.com/extensions/power)
 * [chrome.privacy](https://developer.chrome.com/extensions/privacy)
 * [chrome.proxy](https://developer.chrome.com/extensions/proxy)
-* [chrome.runtime](https://developer.chrome.com/extensions/runtime)
 * [chrome.sessions](https://developer.chrome.com/extensions/sessions)
 * [chrome.storage](https://developer.chrome.com/extensions/storage)
 * [chrome.system.cpu](https://developer.chrome.com/extensions/system.cpu)
