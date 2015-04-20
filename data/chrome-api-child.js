@@ -18,6 +18,7 @@ var browserAction = createObjectIn(chrome, { defineAs: "browserAction" });
 var onClicked = createObjectIn(browserAction, { defineAs: "onClicked" });
 
 var id = 0;
+var runtimeCallbacks = [];
 
 
 // START: chrome.tabs.*
@@ -161,7 +162,6 @@ function tabsSendMessage(tabId, message, options, callback) {
 }
 exportFunction(tabsSendMessage, tabs, { defineAs: "sendMessage" });
 
-let runtimeCallbacks = [];
 self.port.on("tabs:send:message", function(data) {
   var responseMade = false;
   function sendResponse(result) {
@@ -199,6 +199,54 @@ function getCRXManifest() {
   return self.options.manifest;
 }
 exportFunction(getCRXManifest, runtime, { defineAs: "getManifest" });
+
+function runtimeSendMessage(extensionId, message, options, responseCallback) {
+  var queryID = id++;
+  if (typeof options == "function") {
+    responseCallback = options;
+    options = {};
+  }
+
+  self.port.on("runtime:message:response:callback", function wait(data) {
+    if (queryID != data.id) {
+      return null;
+    }
+    self.port.removeListener("runtime:message:response:callback", wait);
+
+    responseCallback(data.response);
+  });
+
+  self.port.emit("runtime:send:message", {
+    id: queryID,
+    extensionId: extensionId,
+    message: message
+  });
+}
+exportFunction(runtimeSendMessage, runtime, { defineAs: "sendMessage" });
+
+// Note: PageMods do not recieve this message
+self.port.on("runtime:send:message", function(data) {
+  function sendResponse(response) {
+    self.port.emit("runtime:message:response:callback", {
+      id: data.id,
+      response: response
+    });
+  }
+
+  var MessageSender = {};
+  if (data.tabId) {
+    MessageSender.tab = {
+      id: data.tabId
+    };
+  }
+  if (data.extensionId) {
+    MessageSender.id = extensionId;
+  }
+
+  runtimeCallbacks.forEach(cb => {
+    cb(cleanse(data.message), cleanse(MessageSender), sendResponse);
+  });
+});
 
 function runtimeOnMessage(callback) {
   if (typeof callback == "function") {
