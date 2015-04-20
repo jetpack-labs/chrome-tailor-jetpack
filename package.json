@@ -11,12 +11,15 @@
   "bugs": {
     "url": "http://github.com/jetpack-labs/chrome-tailor-jetpack/issues"
   },
+  "devDependencies": {
+    "shush": "1.0.0",
+    "webidl2": "^2.0.8"
+  },
   "keywords": [
     "firefox",
     "chrome"
   ],
   "author": "Erik Vold",
   "license": "MPL 2",
-  "dependencies": {
-  }
+  "dependencies": {}
 }

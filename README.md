@@ -28,7 +28,6 @@ APIs supported from the [Chrome extension API](https://developer.chrome.com/exte
 
 #### Not Yet Supported
 
-* [chrome.accessibilityFeatures](https://developer.chrome.com/extensions/accessibilityFeatures)
 * [chrome.alarms](https://developer.chrome.com/extensions/alarms)
 * [chrome.bookmarks](https://developer.chrome.com/extensions/bookmarks)
 * [chrome.browsingData](https://developer.chrome.com/extensions/browsingData)
@@ -78,7 +77,8 @@ APIs supported from the [Chrome extension API](https://developer.chrome.com/exte
 
 #### Not Supported
 
-* [chrome.wallpaper](https://developer.chrome.com/extensions/wallpaper)
+* [chrome.wallpaper](https://developer.chrome.com/extensions/wallpaper) (Chrome OS)
+* [chrome.accessibilityFeatures](https://developer.chrome.com/extensions/accessibilityFeatures) (Chrome OS)
 
 ### Manifest Declarations
 

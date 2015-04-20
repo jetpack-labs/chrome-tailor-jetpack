@@ -1,0 +1,191 @@
+{
+  "stable": {
+    "alarms": {
+      "functions": [
+        "create",
+        "get",
+        "getAll",
+        "clear",
+        "clearAll"
+      ],
+      "events": [
+        "onAlarm"
+      ]
+    },
+    "bookmarks": {
+      "functions": [
+        "get",
+        "getChildren",
+        "getRecent",
+        "getTree",
+        "getSubTree",
+        "search",
+        "create",
+        "move",
+        "update",
+        "remove",
+        "removeTree"
+      ],
+      "events": [
+        "onCreated",
+        "onRemoved",
+        "onChanged",
+        "onMoved",
+        "onChildrenReordered",
+        "onImportBegan",
+        "onImportEnded"
+      ]
+    },
+    "browserAction": {
+      "functions": [
+        "setTitle",
+        "getTitle",
+        "setIcon",
+        "setPopup",
+        "getPopup",
+        "setBadgeText",
+        "getBadgeText",
+        "setBadgeBackgroundColor",
+        "getBadgeBackgroundColor",
+        "enable",
+        "disable"
+      ]
+      "events": [
+        "onClicked"
+      ]
+    },
+    "browsingData": {
+      "functions": [
+        "settings",
+        "remove",
+        "removeAppcache",
+        "removeCache",
+        "removeCookies",
+        "removeDownloads",
+        "removeFileSystems",
+        "removeFormData",
+        "removeHistory",
+        "removeIndexedDB",
+        "removeLocalStorage",
+        "removePluginData",
+        "removePasswords",
+        "removeWebSQL"
+      ]
+    },
+    "commands": {
+      "functions": [
+        "getAll"
+      ],
+      "events": [
+        "onCommand"
+      ]
+    },
+    "contentSettings": {
+      "properties": [
+        "cookies", "images", "javascript", "location", "plugins", "popups", "notifications", "fullscreen", "mouselock", "unsandboxedPlugins", "automaticDownloads"
+      ]
+    },
+    "contextMenus": {
+      "functions": [
+        "create",
+        "update",
+        "remove",
+        "removeAll"
+      ],
+      "events": [
+        "onClicked"
+      ]
+    },
+    "cookies": {
+      "functions": [
+        "get",
+        "getAll",
+        "set",
+        "remove",
+        "getAllCookieStores"
+      ],
+      "events": [
+        "onChanged"
+      ]
+    },
+    "debugger": {
+      "functions": [
+        "attach",
+        "detach",
+        "sendCommand",
+        "getTargets"
+      ],
+      "events": [
+        "onEvent",
+        "onDetach"
+      ]
+    },
+    "declarativeContent",
+    "desktopCapture",
+    "devtools.inspectedWindow",
+    "devtools.network",
+    "devtools.panels",
+    "downloads",
+    "enterprise.platformKeys",
+    "events",
+    "extension",
+    "extensionTypes",
+    "fileBrowserHandler",
+    "fileSystemProvider",
+    "fontSettings",
+    "gcm",
+    "history",
+    "i18n",
+    "identity",
+    "idle",
+    "input.ime",
+    "management",
+    "notifications",
+    "omnibox",
+    "pageAction",
+    "pageCapture",
+    "permissions",
+    "power",
+    "privacy",
+    "proxy",
+    "runtime",
+    "sessions",
+    "storage",
+    "system.cpu",
+    "system.memory",
+    "system.storage",
+    "tabCapture",
+    "tabs",
+    "topSites",
+    "tts",
+    "ttsEngine",
+    "types",
+    "wallpaper",
+    "webNavigation",
+    "webRequest",
+    "webstore",
+    "windows",
+  ],
+  "beta": [
+    "declarativeWebRequest",
+    "networking.config",
+    "vpnProvider",
+  ],
+  "dev": [
+    "automation",
+    "documentScan",
+    "location",
+    "platformKeys",
+    "printerProvider",
+    "processes",
+    "signedInDevices"
+  ],
+  "experimental": [
+    "experimental.devtools.audits",
+    "experimental.devtools.console"
+  ]
+
+  "chromeos": {
+    "accessibilityFeatures": {},
+  }
+}
