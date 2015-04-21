@@ -8,7 +8,7 @@ const { get, set } = require("sdk/preferences/service");
 const { PageMod } = require("sdk/page-mod");
 const { when: unload } = require("sdk/system/unload");
 
-const { setup: setupChromeAPI } = require("../lib/chrome-api-parent");
+const { attach } = require("../lib/chrome-api-controller");
 
 function setup(options) {
   var newtab = options.newtab;
@@ -35,7 +35,7 @@ function setup(options) {
         manifest: require(options.rootURI + "manifest.json")
       },
       onAttach: (mod) => {
-        setupChromeAPI({ target: mod });
+        attach({ target: mod });
       }
     });
   }

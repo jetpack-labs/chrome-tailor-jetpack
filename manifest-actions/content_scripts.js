@@ -6,7 +6,7 @@
 const self = require("sdk/self");
 const { PageMod } = require("sdk/page-mod");
 const { convertPattern } = require("../lib/content-script-utils");
-const { setup: setupChromeAPI, emitter, getTabID } = require("../lib/chrome-api-parent");
+const { attach, bus } = require("../lib/chrome-api-controller");
 const { emit, on, off } = require('sdk/event/core');
 const events = require("sdk/system/events");
 
@@ -63,6 +63,7 @@ function create (options) {
 
   let manifest = require(options.rootURI + "manifest.json");
 
+  console.log("attaching pagemod");
   let mod = PageMod({
     include: include,
     contentScriptFile: scripts,
@@ -75,7 +76,7 @@ function create (options) {
     attachTo: attachTo,
     exclude: exclude,
     onAttach: worker => {
-      setupChromeAPI({ target: worker });
+      attach({ target: worker });
 
       function tabsSendMessage(data) {
         var tabId = data.tabId;
@@ -86,9 +87,9 @@ function create (options) {
           worker.port.emit("tabs:send:message", data);
         }
       }
-      on(emitter, "tabs:send:message", tabsSendMessage);
+      on(bus, "tabs:send:message", tabsSendMessage);
       worker.once("detach", () => {
-        off(emitter, "tabs:send:message", tabsSendMessage);
+        off(bus, "tabs:send:message", tabsSendMessage);
       })
     }
   });
