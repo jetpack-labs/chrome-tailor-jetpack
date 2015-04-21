@@ -1,14 +1,12 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 /**
  * Prebound with the `config` settings in the build script `./scripts/build-chrome-api-child.js`,
  * this function is then called with additional arguments, exposed to the user as a chrome API:
  * `tabs.duplicate(tab)`
  * Handles the message communication with the main Jetpack proc.
  */
-function chromeAPIBridge (config) {
+let INC_ID = 0;
+
+JETPACK.RPC = function (config) {
   var id = INC_ID++;
   var args = Array.prototype.slice.call(arguments);
   // Pop off the configuration;
@@ -41,9 +39,8 @@ function chromeAPIBridge (config) {
       }
     }
   }
-}
+};
 
 function cleanse (obj) {
   return unsafeWindow.JSON.parse(JSON.stringify(obj));
 }
-
