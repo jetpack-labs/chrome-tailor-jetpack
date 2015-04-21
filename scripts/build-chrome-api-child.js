@@ -63,12 +63,11 @@ function identify (apiName, index) {
 function chromeAPIBridge (config) {
   var id = INC_ID++;
   var args = Array.prototype.slice.call(arguments);
-  var successCallback = config.success ? args[config.success] : null;
-  // Not really supporting failureCallback at the moment, as only one API uses it.
-  var failureCallback = config.failure ? args[config.failure] : null;
-
   // Pop off the configuration;
   args.shift();
+  var successCallback = config.success != null ? args[config.success] : null;
+  // Not really supporting failureCallback at the moment, as only one API uses it.
+  var failureCallback = config.failure != null ? args[config.failure] : null;
 
   self.port.on("chrome-api:response", handler);
   self.port.emit("chrome-api:request", {
@@ -85,9 +84,10 @@ function chromeAPIBridge (config) {
       return;
     }
     self.port.removeListener("chrome-api:response", handler);
-    if (typeof successCallback === "function") {
+    var callback = data.error ? failureCallback : successCallback;
+    if (typeof callback === "function") {
       if (data.res != null) {
-        callback.apply(null, cleanse(res));
+        callback.apply(null, cleanse(data.res));
       } else {
         callback();
       }
@@ -135,7 +135,7 @@ function createFunctionsFor (namespace) {
   var def = stubs[namespace];
   var output = "";
   var start = "exportFunction(chromeAPIBridge.bind(null,";
- 
+
   var expose = function (fn) {
     var params = JSON.stringify({
       namespace: namespace,
