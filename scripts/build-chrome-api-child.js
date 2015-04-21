@@ -36,9 +36,12 @@ Object.keys(stubs).forEach(function (namespace) {
   data += createFunctionsFor(namespace, stubs);
 });
 
-// Expose our functions
-data += chromeAPIBridge.toString() + "\n";
-data += cleanse.toString() + "\n";
+// Inject additional content scripts
+fs.readdirSync(path.join(__dirname, "chrome-api-child"))
+  .filter(filterContentScripts)
+  .forEach(function (script) {
+    data += fs.readFileSync(path.join(__dirname, "chrome-api-child", script), "utf8");
+  });
 
 fs.writeFileSync(CONTENT_SCRIPT_DEST, data);
 
@@ -58,48 +61,11 @@ function identify (apiName, index) {
 }
 
 /**
- * Used in content script. Gets stringified.
+ * Filter out file names for content script injection if
+ * they are not js files or are swap files.
  */
-function chromeAPIBridge (config) {
-  var id = INC_ID++;
-  var args = Array.prototype.slice.call(arguments);
-  // Pop off the configuration;
-  args.shift();
-  var successCallback = config.success != null ? args[config.success] : null;
-  // Not really supporting failureCallback at the moment, as only one API uses it.
-  var failureCallback = config.failure != null ? args[config.failure] : null;
-
-  self.port.on("chrome-api:response", handler);
-  self.port.emit("chrome-api:request", {
-    method: config.method,
-    args: args,
-    id: id,
-    namespace: config.namespace,
-    success: config.success,
-    failure: config.failure
-  });
-
-  function handler (data) {
-    if (data.id !== id) {
-      return;
-    }
-    self.port.removeListener("chrome-api:response", handler);
-    var callback = data.error ? failureCallback : successCallback;
-    if (typeof callback === "function") {
-      if (data.res != null) {
-        callback.apply(null, cleanse(data.res));
-      } else {
-        callback();
-      }
-    }
-  }
-}
-
-/**
- * Used in content script. Gets stringified.
- */
-function cleanse (obj) {
-  return unsafeWindow.JSON.parse(JSON.stringify(obj));
+function filterContentScripts (file) {
+  return /\.js$/.test(file) && file[0] !== ".";
 }
 
 /**
@@ -131,10 +97,44 @@ function createObjectsFor (namespace) {
  * @param {object} stubs
  * @return {string}
  */
-function createFunctionsFor (namespace) {
+function createFunctionsFor (namespace, stubs) {
   var def = stubs[namespace];
   var output = "";
   var start = "exportFunction(chromeAPIBridge.bind(null,";
+
+  var expose = function (fn) {
+    var params = JSON.stringify({
+      namespace: namespace,
+      method: fn.name,
+      success: fn.successCallbackIndex,
+      failure: fn.failureCallbackIndex
+    });
+    return start + params + ")," + suffix(fn.name);
+  };
+  var suffix = function (name) {
+    return identify(namespace) + ",{ defineAs:\"" + name + "\"});\n";
+  };
+
+  (def.functions || []).forEach(function (fnDef) {
+    output += expose(fnDef);
+  });
+
+  return output;
+}
+
+/**
+ * Takes a namespace like "tabs", and a stub object from ./definitions/stubs.json
+ * and constructs and returns the `exposeFunction` string for the events (`onMessage`, etc)
+ * handler registration (`onMessage.addListener(fn)`).
+ *
+ * @param {string} namespace
+ * @param {object} stubs
+ * @return {string}
+ */
+function createEventsFor (namespace, stubs) {
+  var def = stubs[namespace];
+  var output = "";
+  var start = "exportFunction(chromeAPIBridge..bind(null,";
 
   var expose = function (fn) {
     var params = JSON.stringify({

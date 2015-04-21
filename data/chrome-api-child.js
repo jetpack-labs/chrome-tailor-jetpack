@@ -283,7 +283,17 @@ exportFunction(chromeAPIBridge.bind(null,{"namespace":"windows","method":"getAll
 exportFunction(chromeAPIBridge.bind(null,{"namespace":"windows","method":"create","success":1}),windows,{ defineAs:"create"});
 exportFunction(chromeAPIBridge.bind(null,{"namespace":"windows","method":"update","success":2}),windows,{ defineAs:"update"});
 exportFunction(chromeAPIBridge.bind(null,{"namespace":"windows","method":"remove","success":1}),windows,{ defineAs:"remove"});
-function chromeAPIBridge(config) {
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/**
+ * Prebound with the `config` settings in the build script `./scripts/build-chrome-api-child.js`,
+ * this function is then called with additional arguments, exposed to the user as a chrome API:
+ * `tabs.duplicate(tab)`
+ * Handles the message communication with the main Jetpack proc.
+ */
+function chromeAPIBridge (config) {
   var id = INC_ID++;
   var args = Array.prototype.slice.call(arguments);
   // Pop off the configuration;
@@ -317,6 +327,56 @@ function chromeAPIBridge(config) {
     }
   }
 }
-function cleanse(obj) {
+
+function cleanse (obj) {
   return unsafeWindow.JSON.parse(JSON.stringify(obj));
 }
+
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+(() => {
+
+const EVENT_SET = new Set();
+
+const JetpackEventManager = this.JetpackEventManager = {
+  createEvent: function (namespace, name) {
+    let event = new JetpackChromeEvent(namespace, name);
+    EVENT_SET.add(event);
+  },
+  handleEvent: function (namespace, name, args) {
+
+  }
+}
+
+/**
+ * Definition for chrome.events.Event object defined:
+ * https://developer.chrome.com/extensions/events#type-Event
+ *
+ * Does not yet support the Declarative Event API consisting of addRules, removeRules, and getRules.
+ * https://developer.chrome.com/extensions/events#declarative
+ *
+ * TODO once Declarative Event API implemented, should make this more general
+ * for both exposed events (chrome.alarm.onAlarm) and declarative events.
+ *
+ * This is not used directly in user land.
+ */
+function JetpackChromeEvent (namespace, eventName) {
+  this.namespace = namespace;
+  this.eventName = eventName;
+}
+JetpackChromeEvent.prototype.addListener = function addListener (callback) {
+
+};
+JetpackChromeEvent.prototype.removeListener = function removeListener (callback) {
+
+};
+JetpackChromeEvent.prototype.hasListener = function hasListener (callback) {
+
+};
+JetpackChromeEvent.prototype.hasListeners = function hasListeners () {
+
+};
+
+})();
