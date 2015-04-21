@@ -1,0 +1,416 @@
+{
+  "alarms": {
+    "functions": [
+      "create",
+      "get",
+      "getAll",
+      "clear",
+      "clearAll"
+    ]
+  },
+  "bookmarks": {
+    "functions": [
+      "get",
+      "getChildren",
+      "getRecent",
+      "getTree",
+      "getSubTree",
+      "search",
+      "create",
+      "move",
+      "update",
+      "remove",
+      "removeTree",
+      "import",
+      "export"
+    ]
+  },
+  "browserAction": {
+    "functions": [
+      "setTitle",
+      "getTitle",
+      "setIcon",
+      "setPopup",
+      "getPopup",
+      "setBadgeText",
+      "getBadgeText",
+      "setBadgeBackgroundColor",
+      "getBadgeBackgroundColor",
+      "enable",
+      "disable",
+      "openPopup"
+    ]
+  },
+  "browsingData": {
+    "functions": [
+      "settings",
+      "remove",
+      "removeAppcache",
+      "removeCache",
+      "removeCookies",
+      "removeDownloads",
+      "removeFileSystems",
+      "removeFormData",
+      "removeHistory",
+      "removeIndexedDB",
+      "removeLocalStorage",
+      "removePluginData",
+      "removePasswords",
+      "removeWebSQL"
+    ]
+  },
+  "commands": {
+    "functions": [
+      "getAll"
+    ]
+  },
+  "contentSettings": {
+    "functions": []
+  },
+  "contextMenus": {
+    "functions": [
+      "create",
+      "update",
+      "remove",
+      "removeAll"
+    ]
+  },
+  "cookies": {
+    "functions": [
+      "get",
+      "getAll",
+      "set",
+      "remove",
+      "getAllCookieStores"
+    ]
+  },
+  "debugger": {
+    "functions": [
+      "attach",
+      "detach",
+      "sendCommand",
+      "getTargets"
+    ]
+  },
+  "declarativeContent": {
+    "functions": []
+  },
+  "desktopCapture": {
+    "functions": [
+      "chooseDesktopMedia",
+      "cancelChooseDesktopMedia"
+    ]
+  },
+  "devtools.inspectedWindow": {
+    "functions": [
+      "eval",
+      "reload",
+      "getResources"
+    ]
+  },
+  "devtools.network": {
+    "functions": [
+      "getHAR"
+    ]
+  },
+  "devtools.panels": {
+    "functions": [
+      "create",
+      "setOpenResourceHandler",
+      "openResource"
+    ]
+  },
+  "downloads": {
+    "functions": [
+      "download",
+      "search",
+      "pause",
+      "resume",
+      "cancel",
+      "getFileIcon",
+      "open",
+      "show",
+      "showDefaultFolder",
+      "erase",
+      "removeFile",
+      "acceptDanger",
+      "drag",
+      "setShelfEnabled"
+    ]
+  },
+  "events": {
+    "functions": []
+  },
+  "extension": {
+    "functions": [
+      "sendRequest",
+      "getURL",
+      "getViews",
+      "getBackgroundPage",
+      "getExtensionTabs",
+      "isAllowedIncognitoAccess",
+      "isAllowedFileSchemeAccess",
+      "setUpdateUrlData"
+    ]
+  },
+  "extensionTypes": {
+    "functions": []
+  },
+  "fontSettings": {
+    "functions": [
+      "clearFont",
+      "getFont",
+      "setFont",
+      "getFontList",
+      "clearDefaultFontSize",
+      "getDefaultFontSize",
+      "setDefaultFontSize",
+      "clearDefaultFixedFontSize",
+      "getDefaultFixedFontSize",
+      "setDefaultFixedFontSize",
+      "clearMinimumFontSize",
+      "getMinimumFontSize",
+      "setMinimumFontSize"
+    ]
+  },
+  "gcm": {
+    "functions": [
+      "register",
+      "unregister",
+      "send"
+    ]
+  },
+  "history": {
+    "functions": [
+      "search",
+      "getVisits",
+      "addUrl",
+      "deleteUrl",
+      "deleteRange",
+      "deleteAll"
+    ]
+  },
+  "i18n": {
+    "functions": [
+      "getAcceptLanguages",
+      "getMessage",
+      "getUILanguage"
+    ]
+  },
+  "identity": {
+    "functions": [
+      "getAccounts",
+      "getAuthToken",
+      "getProfileUserInfo",
+      "removeCachedAuthToken",
+      "launchWebAuthFlow",
+      "getRedirectURL"
+    ]
+  },
+  "idle": {
+    "functions": [
+      "queryState",
+      "setDetectionInterval"
+    ]
+  },
+  "management": {
+    "functions": [
+      "getAll",
+      "get",
+      "getSelf",
+      "getPermissionWarningsById",
+      "getPermissionWarningsByManifest",
+      "setEnabled",
+      "uninstall",
+      "uninstallSelf",
+      "launchApp",
+      "createAppShortcut",
+      "setLaunchType",
+      "generateAppForLink"
+    ]
+  },
+  "notifications": {
+    "functions": [
+      "create",
+      "update",
+      "clear",
+      "getAll",
+      "getPermissionLevel"
+    ]
+  },
+  "omnibox": {
+    "functions": [
+      "sendSuggestions",
+      "setDefaultSuggestion"
+    ]
+  },
+  "pageAction": {
+    "functions": [
+      "show",
+      "hide",
+      "setTitle",
+      "getTitle",
+      "setIcon",
+      "setPopup",
+      "getPopup"
+    ]
+  },
+  "pageCapture": {
+    "functions": [
+      "saveAsMHTML"
+    ]
+  },
+  "permissions": {
+    "functions": [
+      "getAll",
+      "contains",
+      "request",
+      "remove"
+    ]
+  },
+  "power": {
+    "functions": [
+      "requestKeepAwake",
+      "releaseKeepAwake"
+    ]
+  },
+  "privacy": {
+    "functions": []
+  },
+  "proxy": {
+    "functions": []
+  },
+  "runtime": {
+    "functions": [
+      "getBackgroundPage",
+      "openOptionsPage",
+      "getManifest",
+      "getURL",
+      "setUninstallURL",
+      "reload",
+      "requestUpdateCheck",
+      "restart",
+      "connect",
+      "connectNative",
+      "sendMessage",
+      "sendNativeMessage",
+      "getPlatformInfo",
+      "getPackageDirectoryEntry"
+    ]
+  },
+  "sessions": {
+    "functions": [
+      "getRecentlyClosed",
+      "getDevices",
+      "restore"
+    ]
+  },
+  "storage": {
+    "functions": []
+  },
+  "system.cpu": {
+    "functions": [
+      "getInfo"
+    ]
+  },
+  "system.memory": {
+    "functions": [
+      "getInfo"
+    ]
+  },
+  "system.storage": {
+    "functions": [
+      "getInfo",
+      "ejectDevice",
+      "getAvailableCapacity"
+    ]
+  },
+  "tabCapture": {
+    "functions": [
+      "capture",
+      "getCapturedTabs"
+    ]
+  },
+  "tabs": {
+    "functions": [
+      "get",
+      "getCurrent",
+      "connect",
+      "sendRequest",
+      "sendMessage",
+      "getSelected",
+      "getAllInWindow",
+      "create",
+      "duplicate",
+      "query",
+      "highlight",
+      "update",
+      "move",
+      "reload",
+      "remove",
+      "detectLanguage",
+      "captureVisibleTab",
+      "executeScript",
+      "insertCSS",
+      "setZoom",
+      "getZoom",
+      "setZoomSettings",
+      "getZoomSettings"
+    ]
+  },
+  "topSites": {
+    "functions": [
+      "get"
+    ]
+  },
+  "tts": {
+    "functions": [
+      "speak",
+      "stop",
+      "pause",
+      "resume",
+      "isSpeaking",
+      "getVoices"
+    ]
+  },
+  "ttsEngine": {
+    "functions": [
+      "sendTtsEvent"
+    ]
+  },
+  "types": {
+    "functions": []
+  },
+  "wallpaper": {
+    "functions": [
+      "setWallpaper"
+    ]
+  },
+  "webNavigation": {
+    "functions": [
+      "getFrame",
+      "getAllFrames"
+    ]
+  },
+  "webRequest": {
+    "functions": [
+      "handlerBehaviorChanged"
+    ]
+  },
+  "webstore": {
+    "functions": [
+      "install"
+    ]
+  },
+  "windows": {
+    "functions": [
+      "get",
+      "getCurrent",
+      "getLastFocused",
+      "getAll",
+      "create",
+      "update",
+      "remove"
+    ]
+  }
+}
