@@ -17,10 +17,38 @@ var definitions = ChromeAPIDefinitions.getDefinitions({ filter: "stable" });
 
 var output = definitions.reduce(function (output, def) {
   var namespace = output[def.namespace] = {};
-  namespace.functions = (def.functions || []).map(function (fn) { return fn.name });
+  namespace.functions = (def.functions || []).map(createFunctionDefinition);
   return output;
 }, {});
 
 output = JSON.stringify(output, null, 2);
 
 fs.writeFileSync(STUB_PATH, output);
+
+function createFunctionDefinition (fn) {
+  var paramStub = { name: fn.name };
+  var params = fn.parameters;
+
+  if (!params) {
+    return paramStub;
+  }
+
+  var count = 0;
+  for (var i = 0; i < params.length; i++) {
+    if (params[i].type !== "function") {
+      continue;
+    }
+    if (params[i].name === "callback") {
+      paramStub.successCallbackIndex = i;
+    }
+    if (params[i].name === "successCallback") {
+      paramStub.successCallbackIndex = i;
+    }
+    // Only webstore.install uses this, but lets do it anyway
+    if (params[i].name === "failureCallback") {
+      paramStub.failureCallbackIndex = i;
+    }
+  }
+
+  return paramStub;
+}

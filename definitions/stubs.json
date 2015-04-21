@@ -1,67 +1,195 @@
 {
   "alarms": {
     "functions": [
-      "create",
-      "get",
-      "getAll",
-      "clear",
-      "clearAll"
+      {
+        "name": "create"
+      },
+      {
+        "name": "get",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAll",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "clear",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "clearAll",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "bookmarks": {
     "functions": [
-      "get",
-      "getChildren",
-      "getRecent",
-      "getTree",
-      "getSubTree",
-      "search",
-      "create",
-      "move",
-      "update",
-      "remove",
-      "removeTree",
-      "import",
-      "export"
+      {
+        "name": "get",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getChildren",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getRecent",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getTree",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getSubTree",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "search",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "create",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "move",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "update",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "remove",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeTree",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "import",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "export",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "browserAction": {
     "functions": [
-      "setTitle",
-      "getTitle",
-      "setIcon",
-      "setPopup",
-      "getPopup",
-      "setBadgeText",
-      "getBadgeText",
-      "setBadgeBackgroundColor",
-      "getBadgeBackgroundColor",
-      "enable",
-      "disable",
-      "openPopup"
+      {
+        "name": "setTitle"
+      },
+      {
+        "name": "getTitle",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setIcon",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setPopup"
+      },
+      {
+        "name": "getPopup",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setBadgeText"
+      },
+      {
+        "name": "getBadgeText",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setBadgeBackgroundColor"
+      },
+      {
+        "name": "getBadgeBackgroundColor",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "enable"
+      },
+      {
+        "name": "disable"
+      },
+      {
+        "name": "openPopup",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "browsingData": {
     "functions": [
-      "settings",
-      "remove",
-      "removeAppcache",
-      "removeCache",
-      "removeCookies",
-      "removeDownloads",
-      "removeFileSystems",
-      "removeFormData",
-      "removeHistory",
-      "removeIndexedDB",
-      "removeLocalStorage",
-      "removePluginData",
-      "removePasswords",
-      "removeWebSQL"
+      {
+        "name": "settings",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "remove",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "removeAppcache",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeCache",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeCookies",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeDownloads",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeFileSystems",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeFormData",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeHistory",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeIndexedDB",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeLocalStorage",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removePluginData",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removePasswords",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeWebSQL",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "commands": {
     "functions": [
-      "getAll"
+      {
+        "name": "getAll",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "contentSettings": {
@@ -69,27 +197,66 @@
   },
   "contextMenus": {
     "functions": [
-      "create",
-      "update",
-      "remove",
-      "removeAll"
+      {
+        "name": "create",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "update",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "remove",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeAll",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "cookies": {
     "functions": [
-      "get",
-      "getAll",
-      "set",
-      "remove",
-      "getAllCookieStores"
+      {
+        "name": "get",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAll",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "set",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "remove",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAllCookieStores",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "debugger": {
     "functions": [
-      "attach",
-      "detach",
-      "sendCommand",
-      "getTargets"
+      {
+        "name": "attach",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "detach",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "sendCommand",
+        "successCallbackIndex": 3
+      },
+      {
+        "name": "getTargets",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "declarativeContent": {
@@ -97,45 +264,107 @@
   },
   "desktopCapture": {
     "functions": [
-      "chooseDesktopMedia",
-      "cancelChooseDesktopMedia"
+      {
+        "name": "chooseDesktopMedia",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "cancelChooseDesktopMedia"
+      }
     ]
   },
   "devtools.inspectedWindow": {
     "functions": [
-      "eval",
-      "reload",
-      "getResources"
+      {
+        "name": "eval",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "reload"
+      },
+      {
+        "name": "getResources",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "devtools.network": {
     "functions": [
-      "getHAR"
+      {
+        "name": "getHAR",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "devtools.panels": {
     "functions": [
-      "create",
-      "setOpenResourceHandler",
-      "openResource"
+      {
+        "name": "create",
+        "successCallbackIndex": 3
+      },
+      {
+        "name": "setOpenResourceHandler",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "openResource",
+        "successCallbackIndex": 2
+      }
     ]
   },
   "downloads": {
     "functions": [
-      "download",
-      "search",
-      "pause",
-      "resume",
-      "cancel",
-      "getFileIcon",
-      "open",
-      "show",
-      "showDefaultFolder",
-      "erase",
-      "removeFile",
-      "acceptDanger",
-      "drag",
-      "setShelfEnabled"
+      {
+        "name": "download",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "search",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "pause",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "resume",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "cancel",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getFileIcon",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "open"
+      },
+      {
+        "name": "show"
+      },
+      {
+        "name": "showDefaultFolder"
+      },
+      {
+        "name": "erase",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "removeFile",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "acceptDanger",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "drag"
+      },
+      {
+        "name": "setShelfEnabled"
+      }
     ]
   },
   "events": {
@@ -143,14 +372,32 @@
   },
   "extension": {
     "functions": [
-      "sendRequest",
-      "getURL",
-      "getViews",
-      "getBackgroundPage",
-      "getExtensionTabs",
-      "isAllowedIncognitoAccess",
-      "isAllowedFileSchemeAccess",
-      "setUpdateUrlData"
+      {
+        "name": "sendRequest"
+      },
+      {
+        "name": "getURL"
+      },
+      {
+        "name": "getViews"
+      },
+      {
+        "name": "getBackgroundPage"
+      },
+      {
+        "name": "getExtensionTabs"
+      },
+      {
+        "name": "isAllowedIncognitoAccess",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "isAllowedFileSchemeAccess",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "setUpdateUrlData"
+      }
     ]
   },
   "extensionTypes": {
@@ -158,120 +405,306 @@
   },
   "fontSettings": {
     "functions": [
-      "clearFont",
-      "getFont",
-      "setFont",
-      "getFontList",
-      "clearDefaultFontSize",
-      "getDefaultFontSize",
-      "setDefaultFontSize",
-      "clearDefaultFixedFontSize",
-      "getDefaultFixedFontSize",
-      "setDefaultFixedFontSize",
-      "clearMinimumFontSize",
-      "getMinimumFontSize",
-      "setMinimumFontSize"
+      {
+        "name": "clearFont",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getFont",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setFont",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getFontList",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "clearDefaultFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getDefaultFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setDefaultFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "clearDefaultFixedFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getDefaultFixedFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setDefaultFixedFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "clearMinimumFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getMinimumFontSize",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setMinimumFontSize",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "gcm": {
     "functions": [
-      "register",
-      "unregister",
-      "send"
+      {
+        "name": "register",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "unregister",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "send",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "history": {
     "functions": [
-      "search",
-      "getVisits",
-      "addUrl",
-      "deleteUrl",
-      "deleteRange",
-      "deleteAll"
+      {
+        "name": "search",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getVisits",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "addUrl",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "deleteUrl",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "deleteRange",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "deleteAll",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "i18n": {
     "functions": [
-      "getAcceptLanguages",
-      "getMessage",
-      "getUILanguage"
+      {
+        "name": "getAcceptLanguages",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getMessage"
+      },
+      {
+        "name": "getUILanguage"
+      }
     ]
   },
   "identity": {
     "functions": [
-      "getAccounts",
-      "getAuthToken",
-      "getProfileUserInfo",
-      "removeCachedAuthToken",
-      "launchWebAuthFlow",
-      "getRedirectURL"
+      {
+        "name": "getAccounts",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getAuthToken",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getProfileUserInfo",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "removeCachedAuthToken",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "launchWebAuthFlow",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getRedirectURL"
+      }
     ]
   },
   "idle": {
     "functions": [
-      "queryState",
-      "setDetectionInterval"
+      {
+        "name": "queryState",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setDetectionInterval"
+      }
     ]
   },
   "management": {
     "functions": [
-      "getAll",
-      "get",
-      "getSelf",
-      "getPermissionWarningsById",
-      "getPermissionWarningsByManifest",
-      "setEnabled",
-      "uninstall",
-      "uninstallSelf",
-      "launchApp",
-      "createAppShortcut",
-      "setLaunchType",
-      "generateAppForLink"
+      {
+        "name": "getAll",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "get",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getSelf",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getPermissionWarningsById",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getPermissionWarningsByManifest",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setEnabled",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "uninstall",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "uninstallSelf",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "launchApp",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "createAppShortcut",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setLaunchType",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "generateAppForLink",
+        "successCallbackIndex": 2
+      }
     ]
   },
   "notifications": {
     "functions": [
-      "create",
-      "update",
-      "clear",
-      "getAll",
-      "getPermissionLevel"
+      {
+        "name": "create",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "update",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "clear",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAll",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getPermissionLevel",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "omnibox": {
     "functions": [
-      "sendSuggestions",
-      "setDefaultSuggestion"
+      {
+        "name": "sendSuggestions"
+      },
+      {
+        "name": "setDefaultSuggestion"
+      }
     ]
   },
   "pageAction": {
     "functions": [
-      "show",
-      "hide",
-      "setTitle",
-      "getTitle",
-      "setIcon",
-      "setPopup",
-      "getPopup"
+      {
+        "name": "show"
+      },
+      {
+        "name": "hide"
+      },
+      {
+        "name": "setTitle"
+      },
+      {
+        "name": "getTitle",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setIcon",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setPopup"
+      },
+      {
+        "name": "getPopup",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "pageCapture": {
     "functions": [
-      "saveAsMHTML"
+      {
+        "name": "saveAsMHTML",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "permissions": {
     "functions": [
-      "getAll",
-      "contains",
-      "request",
-      "remove"
+      {
+        "name": "getAll",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "contains",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "request",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "remove",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "power": {
     "functions": [
-      "requestKeepAwake",
-      "releaseKeepAwake"
+      {
+        "name": "requestKeepAwake"
+      },
+      {
+        "name": "releaseKeepAwake"
+      }
     ]
   },
   "privacy": {
@@ -282,27 +715,69 @@
   },
   "runtime": {
     "functions": [
-      "getBackgroundPage",
-      "openOptionsPage",
-      "getManifest",
-      "getURL",
-      "setUninstallURL",
-      "reload",
-      "requestUpdateCheck",
-      "restart",
-      "connect",
-      "connectNative",
-      "sendMessage",
-      "sendNativeMessage",
-      "getPlatformInfo",
-      "getPackageDirectoryEntry"
+      {
+        "name": "getBackgroundPage",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "openOptionsPage",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getManifest"
+      },
+      {
+        "name": "getURL"
+      },
+      {
+        "name": "setUninstallURL"
+      },
+      {
+        "name": "reload"
+      },
+      {
+        "name": "requestUpdateCheck",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "restart"
+      },
+      {
+        "name": "connect"
+      },
+      {
+        "name": "connectNative"
+      },
+      {
+        "name": "sendMessage"
+      },
+      {
+        "name": "sendNativeMessage"
+      },
+      {
+        "name": "getPlatformInfo",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getPackageDirectoryEntry",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "sessions": {
     "functions": [
-      "getRecentlyClosed",
-      "getDevices",
-      "restore"
+      {
+        "name": "getRecentlyClosed",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getDevices",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "restore",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "storage": {
@@ -310,72 +785,179 @@
   },
   "system.cpu": {
     "functions": [
-      "getInfo"
+      {
+        "name": "getInfo",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "system.memory": {
     "functions": [
-      "getInfo"
+      {
+        "name": "getInfo",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "system.storage": {
     "functions": [
-      "getInfo",
-      "ejectDevice",
-      "getAvailableCapacity"
+      {
+        "name": "getInfo",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "ejectDevice",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAvailableCapacity",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "tabCapture": {
     "functions": [
-      "capture",
-      "getCapturedTabs"
+      {
+        "name": "capture",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getCapturedTabs",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "tabs": {
     "functions": [
-      "get",
-      "getCurrent",
-      "connect",
-      "sendRequest",
-      "sendMessage",
-      "getSelected",
-      "getAllInWindow",
-      "create",
-      "duplicate",
-      "query",
-      "highlight",
-      "update",
-      "move",
-      "reload",
-      "remove",
-      "detectLanguage",
-      "captureVisibleTab",
-      "executeScript",
-      "insertCSS",
-      "setZoom",
-      "getZoom",
-      "setZoomSettings",
-      "getZoomSettings"
+      {
+        "name": "get",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getCurrent",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "connect"
+      },
+      {
+        "name": "sendRequest"
+      },
+      {
+        "name": "sendMessage"
+      },
+      {
+        "name": "getSelected",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAllInWindow",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "create",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "duplicate",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "query",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "highlight",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "update",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "move",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "reload",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "remove",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "detectLanguage",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "captureVisibleTab",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "executeScript",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "insertCSS",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "setZoom",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "getZoom",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setZoomSettings",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "getZoomSettings",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "topSites": {
     "functions": [
-      "get"
+      {
+        "name": "get",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "tts": {
     "functions": [
-      "speak",
-      "stop",
-      "pause",
-      "resume",
-      "isSpeaking",
-      "getVoices"
+      {
+        "name": "speak",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "stop"
+      },
+      {
+        "name": "pause"
+      },
+      {
+        "name": "resume"
+      },
+      {
+        "name": "isSpeaking",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "getVoices",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "ttsEngine": {
     "functions": [
-      "sendTtsEvent"
+      {
+        "name": "sendTtsEvent"
+      }
     ]
   },
   "types": {
@@ -383,34 +965,71 @@
   },
   "wallpaper": {
     "functions": [
-      "setWallpaper"
+      {
+        "name": "setWallpaper",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "webNavigation": {
     "functions": [
-      "getFrame",
-      "getAllFrames"
+      {
+        "name": "getFrame",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAllFrames",
+        "successCallbackIndex": 1
+      }
     ]
   },
   "webRequest": {
     "functions": [
-      "handlerBehaviorChanged"
+      {
+        "name": "handlerBehaviorChanged",
+        "successCallbackIndex": 0
+      }
     ]
   },
   "webstore": {
     "functions": [
-      "install"
+      {
+        "name": "install",
+        "successCallbackIndex": 1,
+        "failureCallbackIndex": 2
+      }
     ]
   },
   "windows": {
     "functions": [
-      "get",
-      "getCurrent",
-      "getLastFocused",
-      "getAll",
-      "create",
-      "update",
-      "remove"
+      {
+        "name": "get",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "getCurrent",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getLastFocused",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "getAll",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "create",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "update",
+        "successCallbackIndex": 2
+      },
+      {
+        "name": "remove",
+        "successCallbackIndex": 1
+      }
     ]
   }
 }
