@@ -25,6 +25,8 @@ exports["test chrome.storage.set"] = function(assert, done) {
         assert.equal(ss.storage.urls.length, 1, "there is one url");
         assert.equal(ss.storage.urls[0], url, "the only url is correct!");
 
+        delete ss.storage.urls;
+
         unload();
 
         cleanUI().then(done);
