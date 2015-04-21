@@ -5,6 +5,10 @@
 
 document.addEventListener('DOMContentLoaded', function() {
   chrome.tabs.getCurrent(function(tab) {
+    if (tab.title != "chrome.tabs.sendMessage") {
+      return null;
+    }
+
     chrome.tabs.sendMessage(tab.id, {
       title: "MESSAGE TEST"
     }, function(response) {

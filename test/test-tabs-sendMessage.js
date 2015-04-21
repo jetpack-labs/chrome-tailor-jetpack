@@ -10,11 +10,11 @@ const { cleanUI } = require("sdk/test/utils");
 const { load } = require("../crx");
 
 exports["test chrome.tabs.sendMessage"] = function(assert, done) {
-  let title = "FOO";
+  let title = "chrome.tabs.sendMessage";
   tabs.open({
     url: "data:text/html;charset=utf-8,<title>" + title + "</title>",
     onLoad: (tab) => {
-      assert.equal(tab.title, "FOO", "title is FOO");
+      assert.equal(tab.title, title, "title is FOO");
 
       tabs.on("load", function wait(tab) {
         if (tab.title == "DONE MESSAGE TEST") {

@@ -10,7 +10,7 @@ const { cleanUI } = require("sdk/test/utils");
 const { load } = require("../crx");
 
 exports["test chrome.runtime.sendMessage"] = function(assert, done) {
-  let title = "FOO2";
+  let title = "chrome.runtime.sendMessage";
   tabs.open({
     url: "data:text/html;charset=utf-8,<title>" + title + "</title>",
     onLoad: (tab) => {

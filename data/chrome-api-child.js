@@ -11,6 +11,9 @@ var extension = createObjectIn(chrome, { defineAs: "extension" });
 var history = createObjectIn(chrome, { defineAs: "history" });
 var topSites = createObjectIn(chrome, { defineAs: "topSites" });
 
+var storage = createObjectIn(chrome, { defineAs: "storage" });
+var localStorage = createObjectIn(storage, { defineAs: "local" });
+
 var runtime = createObjectIn(chrome, { defineAs: "runtime" });
 var onMessage = createObjectIn(runtime, { defineAs: "onMessage" });
 
@@ -387,6 +390,66 @@ exportFunction(browserActionOnClick, onClicked, { defineAs: "addListener" });
 
 
 // END: chrome.browserAction.*
+
+
+// START: chrome.storage.*
+
+function localStorageGet(keys, callback) {
+  var queryID = id++;
+
+  self.port.on("storage:local:got", function wait(data) {
+    if (data.id == queryID) {
+      self.port.removeListener("storage:local:got", wait);
+      callback && callback(cleanse(data.items));
+    }
+    return null;
+  });
+
+  self.port.emit("storage:local:get", {
+    id: queryID,
+    keys: keys
+  });
+}
+exportFunction(localStorageGet, localStorage, { defineAs: "get" });
+
+function localStorageGetBytesInUse(keys, callback) {
+  var queryID = id++;
+
+  self.port.on("storage:get:quota:callback", function wait(data) {
+    if (data.id == queryID) {
+      self.port.removeListener("storage:get:quota:callback", wait);
+      callback && callback(cleanse(data.bytesInUse));
+    }
+    return null;
+  });
+
+  self.port.emit("storage:get:quota", {
+    id: queryID,
+    keys: keys
+  });
+}
+exportFunction(localStorageGetBytesInUse, localStorage, { defineAs: "getBytesInUse" });
+
+
+function localStorageSet(items, callback) {
+  var queryID = id++;
+
+  self.port.on("storage:local:set:callback", function wait(data) {
+    if (data.id == queryID) {
+      self.port.removeListener("storage:local:set:callback", wait);
+      callback && callback();
+    }
+    return null;
+  });
+
+  self.port.emit("storage:local:set", {
+    id: queryID,
+    items: items
+  });
+}
+exportFunction(localStorageSet, localStorage, { defineAs: "set" });
+
+// END: chrome.storage.*
 
 
 function cleanse(obj) {

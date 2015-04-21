@@ -23,6 +23,8 @@ APIs supported from the [Chrome extension API](https://developer.chrome.com/exte
   * More detailed needed for models used here
 * [chrome.runtime](https://developer.chrome.com/extensions/runtime)
   * `getURL`, `getManifest`, `onMessage`, `sendMessage`
+* [chrome.storage.local](https://developer.chrome.com/extensions/storage)
+  * `get`, `getBytesInUse`, `set`
 * [chrome.tabs](https://developer.chrome.com/extensions/tabs)
   * `create`, `duplicate`, `executeScript`, `getCurrent`, `query`, `remove`, `sendMessage`
 

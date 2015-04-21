@@ -4,10 +4,14 @@
 "use strict";
 
 chrome.tabs.getCurrent(function(tab) {
+  if (tab.title != "chrome.runtime.sendMessage") {
+    return null;
+  }
+
   chrome.runtime.sendMessage(undefined, {
     title: "MESSAGE TEST"
   }, function(response) {
-    chrome.tabs.create({ url: "data:text/html;charset=utf-8,<title>"  + response + "</title>" })
+    chrome.tabs.create({ url: "data:text/html;charset=utf-8,<title>" + response + "</title>" })
   });
 });
 
