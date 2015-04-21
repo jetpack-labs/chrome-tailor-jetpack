@@ -20,6 +20,9 @@
         "name": "clearAll",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onAlarm"
     ]
   },
   "bookmarks": {
@@ -76,6 +79,15 @@
         "name": "export",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onCreated",
+      "onRemoved",
+      "onChanged",
+      "onMoved",
+      "onChildrenReordered",
+      "onImportBegan",
+      "onImportEnded"
     ]
   },
   "browserAction": {
@@ -122,6 +134,9 @@
         "name": "openPopup",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onClicked"
     ]
   },
   "browsingData": {
@@ -182,7 +197,8 @@
         "name": "removeWebSQL",
         "successCallbackIndex": 1
       }
-    ]
+    ],
+    "events": []
   },
   "commands": {
     "functions": [
@@ -190,10 +206,14 @@
         "name": "getAll",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onCommand"
     ]
   },
   "contentSettings": {
-    "functions": []
+    "functions": [],
+    "events": []
   },
   "contextMenus": {
     "functions": [
@@ -213,6 +233,9 @@
         "name": "removeAll",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onClicked"
     ]
   },
   "cookies": {
@@ -237,6 +260,9 @@
         "name": "getAllCookieStores",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onChanged"
     ]
   },
   "debugger": {
@@ -257,10 +283,17 @@
         "name": "getTargets",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onEvent",
+      "onDetach"
     ]
   },
   "declarativeContent": {
-    "functions": []
+    "functions": [],
+    "events": [
+      "onPageChanged"
+    ]
   },
   "desktopCapture": {
     "functions": [
@@ -271,7 +304,8 @@
       {
         "name": "cancelChooseDesktopMedia"
       }
-    ]
+    ],
+    "events": []
   },
   "devtools.inspectedWindow": {
     "functions": [
@@ -286,6 +320,10 @@
         "name": "getResources",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onResourceAdded",
+      "onResourceContentCommitted"
     ]
   },
   "devtools.network": {
@@ -294,6 +332,10 @@
         "name": "getHAR",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onRequestFinished",
+      "onNavigated"
     ]
   },
   "devtools.panels": {
@@ -310,7 +352,8 @@
         "name": "openResource",
         "successCallbackIndex": 2
       }
-    ]
+    ],
+    "events": []
   },
   "downloads": {
     "functions": [
@@ -365,10 +408,17 @@
       {
         "name": "setShelfEnabled"
       }
+    ],
+    "events": [
+      "onCreated",
+      "onErased",
+      "onChanged",
+      "onDeterminingFilename"
     ]
   },
   "events": {
-    "functions": []
+    "functions": [],
+    "events": []
   },
   "extension": {
     "functions": [
@@ -398,10 +448,15 @@
       {
         "name": "setUpdateUrlData"
       }
+    ],
+    "events": [
+      "onRequest",
+      "onRequestExternal"
     ]
   },
   "extensionTypes": {
-    "functions": []
+    "functions": [],
+    "events": []
   },
   "fontSettings": {
     "functions": [
@@ -457,6 +512,12 @@
         "name": "setMinimumFontSize",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onFontChanged",
+      "onDefaultFontSizeChanged",
+      "onDefaultFixedFontSizeChanged",
+      "onMinimumFontSizeChanged"
     ]
   },
   "gcm": {
@@ -473,6 +534,11 @@
         "name": "send",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onMessage",
+      "onMessagesDeleted",
+      "onSendError"
     ]
   },
   "history": {
@@ -501,6 +567,10 @@
         "name": "deleteAll",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onVisited",
+      "onVisitRemoved"
     ]
   },
   "i18n": {
@@ -515,7 +585,8 @@
       {
         "name": "getUILanguage"
       }
-    ]
+    ],
+    "events": []
   },
   "identity": {
     "functions": [
@@ -542,6 +613,9 @@
       {
         "name": "getRedirectURL"
       }
+    ],
+    "events": [
+      "onSignInChanged"
     ]
   },
   "idle": {
@@ -553,6 +627,9 @@
       {
         "name": "setDetectionInterval"
       }
+    ],
+    "events": [
+      "onStateChanged"
     ]
   },
   "management": {
@@ -605,6 +682,12 @@
         "name": "generateAppForLink",
         "successCallbackIndex": 2
       }
+    ],
+    "events": [
+      "onInstalled",
+      "onUninstalled",
+      "onEnabled",
+      "onDisabled"
     ]
   },
   "notifications": {
@@ -629,6 +712,13 @@
         "name": "getPermissionLevel",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onClosed",
+      "onClicked",
+      "onButtonClicked",
+      "onPermissionLevelChanged",
+      "onShowSettings"
     ]
   },
   "omnibox": {
@@ -639,6 +729,12 @@
       {
         "name": "setDefaultSuggestion"
       }
+    ],
+    "events": [
+      "onInputStarted",
+      "onInputChanged",
+      "onInputEntered",
+      "onInputCancelled"
     ]
   },
   "pageAction": {
@@ -667,6 +763,9 @@
         "name": "getPopup",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onClicked"
     ]
   },
   "pageCapture": {
@@ -675,7 +774,8 @@
         "name": "saveAsMHTML",
         "successCallbackIndex": 1
       }
-    ]
+    ],
+    "events": []
   },
   "permissions": {
     "functions": [
@@ -695,6 +795,10 @@
         "name": "remove",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onAdded",
+      "onRemoved"
     ]
   },
   "power": {
@@ -705,13 +809,18 @@
       {
         "name": "releaseKeepAwake"
       }
-    ]
+    ],
+    "events": []
   },
   "privacy": {
-    "functions": []
+    "functions": [],
+    "events": []
   },
   "proxy": {
-    "functions": []
+    "functions": [],
+    "events": [
+      "onProxyError"
+    ]
   },
   "runtime": {
     "functions": [
@@ -762,6 +871,19 @@
         "name": "getPackageDirectoryEntry",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onStartup",
+      "onInstalled",
+      "onSuspend",
+      "onSuspendCanceled",
+      "onUpdateAvailable",
+      "onBrowserUpdateAvailable",
+      "onConnect",
+      "onConnectExternal",
+      "onMessage",
+      "onMessageExternal",
+      "onRestartRequired"
     ]
   },
   "sessions": {
@@ -778,10 +900,16 @@
         "name": "restore",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onChanged"
     ]
   },
   "storage": {
-    "functions": []
+    "functions": [],
+    "events": [
+      "onChanged"
+    ]
   },
   "system.cpu": {
     "functions": [
@@ -789,7 +917,8 @@
         "name": "getInfo",
         "successCallbackIndex": 0
       }
-    ]
+    ],
+    "events": []
   },
   "system.memory": {
     "functions": [
@@ -797,7 +926,8 @@
         "name": "getInfo",
         "successCallbackIndex": 0
       }
-    ]
+    ],
+    "events": []
   },
   "system.storage": {
     "functions": [
@@ -813,6 +943,10 @@
         "name": "getAvailableCapacity",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onAttached",
+      "onDetached"
     ]
   },
   "tabCapture": {
@@ -825,6 +959,9 @@
         "name": "getCapturedTabs",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onStatusChanged"
     ]
   },
   "tabs": {
@@ -918,6 +1055,21 @@
         "name": "getZoomSettings",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onCreated",
+      "onUpdated",
+      "onMoved",
+      "onSelectionChanged",
+      "onActiveChanged",
+      "onActivated",
+      "onHighlightChanged",
+      "onHighlighted",
+      "onDetached",
+      "onAttached",
+      "onRemoved",
+      "onReplaced",
+      "onZoomChange"
     ]
   },
   "topSites": {
@@ -926,7 +1078,8 @@
         "name": "get",
         "successCallbackIndex": 0
       }
-    ]
+    ],
+    "events": []
   },
   "tts": {
     "functions": [
@@ -951,6 +1104,9 @@
         "name": "getVoices",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onEvent"
     ]
   },
   "ttsEngine": {
@@ -958,10 +1114,17 @@
       {
         "name": "sendTtsEvent"
       }
+    ],
+    "events": [
+      "onSpeak",
+      "onStop",
+      "onPause",
+      "onResume"
     ]
   },
   "types": {
-    "functions": []
+    "functions": [],
+    "events": []
   },
   "wallpaper": {
     "functions": [
@@ -969,7 +1132,8 @@
         "name": "setWallpaper",
         "successCallbackIndex": 1
       }
-    ]
+    ],
+    "events": []
   },
   "webNavigation": {
     "functions": [
@@ -981,6 +1145,17 @@
         "name": "getAllFrames",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onBeforeNavigate",
+      "onCommitted",
+      "onDOMContentLoaded",
+      "onCompleted",
+      "onErrorOccurred",
+      "onCreatedNavigationTarget",
+      "onReferenceFragmentUpdated",
+      "onTabReplaced",
+      "onHistoryStateUpdated"
     ]
   },
   "webRequest": {
@@ -989,6 +1164,17 @@
         "name": "handlerBehaviorChanged",
         "successCallbackIndex": 0
       }
+    ],
+    "events": [
+      "onBeforeRequest",
+      "onBeforeSendHeaders",
+      "onSendHeaders",
+      "onHeadersReceived",
+      "onAuthRequired",
+      "onResponseStarted",
+      "onBeforeRedirect",
+      "onCompleted",
+      "onErrorOccurred"
     ]
   },
   "webstore": {
@@ -998,6 +1184,10 @@
         "successCallbackIndex": 1,
         "failureCallbackIndex": 2
       }
+    ],
+    "events": [
+      "onInstallStageChanged",
+      "onDownloadProgress"
     ]
   },
   "windows": {
@@ -1030,6 +1220,11 @@
         "name": "remove",
         "successCallbackIndex": 1
       }
+    ],
+    "events": [
+      "onCreated",
+      "onRemoved",
+      "onFocusChanged"
     ]
   }
 }

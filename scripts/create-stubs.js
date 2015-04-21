@@ -18,6 +18,7 @@ var definitions = ChromeAPIDefinitions.getDefinitions({ filter: "stable" });
 var output = definitions.reduce(function (output, def) {
   var namespace = output[def.namespace] = {};
   namespace.functions = (def.functions || []).map(createFunctionDefinition);
+  namespace.events = (def.events || []).map(createEventDefinition);
   return output;
 }, {});
 
@@ -51,4 +52,8 @@ function createFunctionDefinition (fn) {
   }
 
   return paramStub;
+}
+
+function createEventDefinition (ev) {
+  return ev.name;
 }
