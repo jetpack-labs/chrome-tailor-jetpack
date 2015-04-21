@@ -68,7 +68,9 @@ function chromeAPIBridge (config) {
     method: config.method,
     args: args,
     id: id,
-    namespace: config.namespace
+    namespace: config.namespace,
+    success: config.success,
+    failure: config.failure
   });
 
   function handler (data) {
