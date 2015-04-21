@@ -6,7 +6,7 @@
 const self = require("sdk/self");
 const pageWorker = require("sdk/page-worker");
 const events = require("sdk/system/events");
-const setupChromeAPI = require("../lib/chrome-api-parent").setup;
+const { attach } = require("../lib/chrome-api-controller");
 
 function create(options) {
   let pageURL = options.page || self.data.url("default-background.html");
@@ -24,7 +24,7 @@ function create(options) {
     }
   });
 
-  setupChromeAPI({ target: backgroundPage });
+  attach({ target: backgroundPage });
 
   function unloadWait(event) {
     if (event.subject.name == manifest.name) {

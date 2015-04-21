@@ -10,7 +10,7 @@ const { setTimeout } = require("sdk/timers");
 const { emit, on, off } = require('sdk/event/core');
 const events = require("sdk/system/events");
 
-const { setup, emitter } = require("../lib/chrome-api-parent");
+const { attach, bus } = require("../lib/chrome-api-controller");
 
 function create(options) {
   let icon = options.default_icon || "";
@@ -46,14 +46,14 @@ function create(options) {
           }, 500)
         });
 
-        setup({ target: panel });
+        attach({ target: panel });
 
         panel.show({
           position: button
         });
       }
 
-      emit(emitter, "browser-action:onclicked");
+      emit(bus, "browser-action:onclicked");
     }
   });
 
