@@ -6,7 +6,7 @@
 const self = require("sdk/self");
 const { load } = require("./crx");
 
-var rootURI = self.data.url("/crx/");
+var rootURI = self.data.url("crx/");
 var crx = load({
   rootURI: rootURI
 });
