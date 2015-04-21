@@ -17,6 +17,8 @@
   ],
   "author": "Erik Vold",
   "license": "MPL 2",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "chrome-api-definitions": "^1.0.0"
   }
 }
