@@ -20,7 +20,7 @@ JETPACK.RPC = function (config) {
     method: config.method,
     args: args,
     id: id,
-    namespace: config.namespace,
+    name: config.name,
     success: config.success,
     failure: config.failure
   });
