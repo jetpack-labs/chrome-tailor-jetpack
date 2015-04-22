@@ -13,6 +13,7 @@ var path = require("path");
 var fs = require("fs");
 var stubs = require("../definitions/stubs.json");
 var data = "";
+var CONTENT_API_DIR = path.join(__dirname, "..", "content-api");
 var CONTENT_SCRIPT_DEST = path.join(__dirname, "..", "data", "chrome-api-child.js");
 // List of scripts located in ./scripts/chrome-api-child/*.js,
 // in order of injection, minus the header and footer.
@@ -23,11 +24,11 @@ var SCRIPT_FILES = [
 ];
 
 // Inject the header first before all.
-data += fs.readFileSync(path.join(__dirname, "chrome-api-child", "header.js"), "utf8");
+data += fs.readFileSync(path.join(CONTENT_API_DIR, "header.js"), "utf8");
 
 // Inject all files in SCRIPT_FILES in order
 SCRIPT_FILES.forEach(function (file) {
-  data += closureWrap(fs.readFileSync(path.join(__dirname, "chrome-api-child", file), "utf8"));
+  data += closureWrap(fs.readFileSync(path.join(CONTENT_API_DIR, file), "utf8"));
 });
 
 // Inject our stub data so that globals and functions can be created
@@ -35,7 +36,7 @@ data += "JETPACK.API_DEFINITIONS = " + JSON.stringify(stubs) + "\n";
 
 // Inject the footer that binds all of the APIs to the unsafeWindow etc. and kicks
 // everything off.
-data += fs.readFileSync(path.join(__dirname, "chrome-api-child", "footer.js"), "utf8");
+data += fs.readFileSync(path.join(CONTENT_API_DIR, "footer.js"), "utf8");
 
 // Output to ./data/chrome-api-child.js
 fs.writeFileSync(CONTENT_SCRIPT_DEST, data);
