@@ -196,9 +196,6 @@ Object.keys(definitions).map(namespace => {
 });
 
 function bindDefinition (namespace, def) {
-  if (namespace === "storage.local") {
-    console.log("binding", namespace, def);
-  }
   bindFunctions(namespace, def.functions);
   bindEvents(namespace, def.events);
   bindProperties(namespace, def.properties);
@@ -276,6 +273,10 @@ function bindProperties (namespace, properties={}) {
         throw new Error(`No type definition found for ${def.class} in ${namespace}.`);
       }
       bindDefinition(`${namespace}.${prop}`, typeDef);
+
+      // Also bind the original definition, as it can contain additional
+      // properties
+      bindDefinition(`${namespace}.${prop}`, def);
     }
     // If this is just a value, probably an enum or constant -- just set
     else if (def.value != null) {
