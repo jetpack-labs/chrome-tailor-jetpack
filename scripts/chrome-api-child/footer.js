@@ -4,11 +4,12 @@
  * and creates the API objects and function/event hooks in the proper scope.
  */
 let definitions = JETPACK.API_DEFINITIONS;
-let chrome = createObjectIn(unsafeWindow, { defineAs: "chrome" });
+let chrome = unsafeWindow.chrome = createObjectIn(unsafeWindow);
 
 Object.keys(definitions).forEach(namespace => {
   let def = definitions[namespace];
   bindFunctions(namespace, def.functions);
+  bindEvents(namespace, def.events);
 });
 
 /**
@@ -36,5 +37,16 @@ function bindFunctions (namespace, functions=[]) {
   functions.forEach(fnDef => {
     let { name: method, successCallbackIndex: success, failureCallbackIndex: failure } = fnDef;
     exportFunction(JETPACK.RPC.bind(null, { namespace, method, success, failure }), ns, { defineAs: method });
+  });
+}
+
+function bindEvents (namespace, events=[]) {
+  let ns = getNamespace(namespace);
+  events.forEach(name => {
+    // EventManager.getEvent caches the event instance,
+    // so we can lazily load event objects
+    Object.defineProperty(ns, name, {
+      get: exportFunction(() => JETPACK.EventManager.getEvent(`${namespace}.${name}`).getShadow(), ns)
+    });
   });
 }

@@ -17,7 +17,9 @@ var CONTENT_SCRIPT_DEST = path.join(__dirname, "..", "data", "chrome-api-child.j
 // List of scripts located in ./scripts/chrome-api-child/*.js,
 // in order of injection, minus the header and footer.
 var SCRIPT_FILES = [
-  "chrome-api-bridge.js"
+  "utils.js",
+  "chrome-api-bridge.js",
+  "event.js",
 ];
 
 // Inject the header first before all.

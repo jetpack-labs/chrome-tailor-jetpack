@@ -12,6 +12,50 @@ const JETPACK = {};
 
 (function(){
 /**
+ * Takes an object with functions, and constructs a factory for this object.
+ * Instances also have a new method, `getShadow()`, returning a shimmed
+ * version of the instance for use in `unsafeWindow` context, whose function calls
+ * are stitched together here with the real instance.
+ *
+ * This is totally overengineered, but every other method was tripped up by
+ * something with security, sandboxes, or xrays.
+ */
+function Class (Base) {
+  let InstanceMap = new Map();
+
+  // Strip out `initialize` function and any `_` properties
+  // for the shadow API.
+  let shadowAPI = Object.keys(Base).reduce((shadow, prop) => {
+    if (prop === "initialize" || prop[0] === "_") {
+      return shadow;
+    }
+
+    let proxy = function () {
+      return Base[prop].apply(InstanceMap.get(this), arguments);
+    };
+
+    shadow[prop] = exportFunction(proxy, unsafeWindow);
+
+    return shadow;
+  }, createObjectIn(unsafeWindow));
+
+  return function () {
+    let realInstance = Object.create(Base);
+    realInstance.initialize.apply(realInstance, arguments);
+    let shadowInstance = cloneInto(shadowAPI, unsafeWindow, { cloneFunctions: true });
+    InstanceMap.set(shadowInstance, realInstance);
+
+    realInstance.getShadow = () => shadowInstance;
+
+    return realInstance;
+  };
+}
+JETPACK.Class = Class;
+
+})();
+
+(function(){
+/**
  * Prebound with the `config` settings in the build script `./scripts/build-chrome-api-child.js`,
  * this function is then called with additional arguments, exposed to the user as a chrome API:
  * `tabs.duplicate(tab)`
@@ -59,6 +103,78 @@ function cleanse (obj) {
 }
 
 })();
+
+(function(){
+/**
+ * Handles event calls from platform. Takes an object with the following config:
+ *
+ * @param {string} name
+ *        Name of the event, including namespace, like "tabs.onCreated".
+ * @param {Array} args
+ */
+self.port.on("chrome-api:event", function ({ name, args }) {
+  JETPACK.EventManager.handleEvent(name, args);
+});
+
+JETPACK.EventManager = {
+  events: new Map(),
+  getEvent: function (name) {
+    if (this.events.has(name)) {
+      return this.events.get(name);
+    }
+    let event = Event(name);
+    this.events.set(name, event);
+    return event;
+  },
+  handleEvent: function (name, args) {
+    let event = this.events.get(name);
+
+    if (!event) {
+      return;
+    }
+
+    event._execute(args);
+  }
+}
+
+/**
+ * Definition for chrome.events.Event object defined:
+ * https://developer.chrome.com/extensions/events#type-Event
+ *
+ * Does not yet support the Declarative Event API consisting of addRules, removeRules, and getRules.
+ * https://developer.chrome.com/extensions/events#declarative
+ *
+ * TODO once Declarative Event API implemented, should make this more general
+ * for both exposed events (chrome.alarm.onAlarm) and declarative events.
+ *
+ * This is not directly exposed to chrome.* APIs, but already attached
+ * on some namespaces (`chrome.alarm.onAlarm`).
+ */
+let Event = JETPACK.Class({
+  initialize: function (name) {
+    this._name = name;
+    this._events = new Set();
+  },
+  addListener: function addListener (callback) {
+    this._events.add(callback);
+  },
+  removeListener: function removeListener (callback) {
+    this._events.remove(callback);
+  },
+  hasListener: function hasListener (callback) {
+    return this._events.has(callback);
+  },
+  hasListeners: function hasListeners () {
+    return !!this._events.length;
+  },
+  _execute: function (args) {
+    for (let ev of this._events) {
+      ev.apply(unsafeWindow, cloneInto(args, unsafeWindow));
+    }
+  }
+});
+
+})();
 JETPACK.API_DEFINITIONS = {"alarms":{"functions":[{"name":"create"},{"name":"get","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":0},{"name":"clear","successCallbackIndex":1},{"name":"clearAll","successCallbackIndex":0}],"events":["onAlarm"]},"bookmarks":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getChildren","successCallbackIndex":1},{"name":"getRecent","successCallbackIndex":1},{"name":"getTree","successCallbackIndex":0},{"name":"getSubTree","successCallbackIndex":1},{"name":"search","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"move","successCallbackIndex":2},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"removeTree","successCallbackIndex":1},{"name":"import","successCallbackIndex":0},{"name":"export","successCallbackIndex":0}],"events":["onCreated","onRemoved","onChanged","onMoved","onChildrenReordered","onImportBegan","onImportEnded"]},"browserAction":{"functions":[{"name":"setTitle"},{"name":"getTitle","successCallbackIndex":1},{"name":"setIcon","successCallbackIndex":1},{"name":"setPopup"},{"name":"getPopup","successCallbackIndex":1},{"name":"setBadgeText"},{"name":"getBadgeText","successCallbackIndex":1},{"name":"setBadgeBackgroundColor"},{"name":"getBadgeBackgroundColor","successCallbackIndex":1},{"name":"enable"},{"name":"disable"},{"name":"openPopup","successCallbackIndex":0}],"events":["onClicked"]},"browsingData":{"functions":[{"name":"settings","successCallbackIndex":0},{"name":"remove","successCallbackIndex":2},{"name":"removeAppcache","successCallbackIndex":1},{"name":"removeCache","successCallbackIndex":1},{"name":"removeCookies","successCallbackIndex":1},{"name":"removeDownloads","successCallbackIndex":1},{"name":"removeFileSystems","successCallbackIndex":1},{"name":"removeFormData","successCallbackIndex":1},{"name":"removeHistory","successCallbackIndex":1},{"name":"removeIndexedDB","successCallbackIndex":1},{"name":"removeLocalStorage","successCallbackIndex":1},{"name":"removePluginData","successCallbackIndex":1},{"name":"removePasswords","successCallbackIndex":1},{"name":"removeWebSQL","successCallbackIndex":1}],"events":[]},"commands":{"functions":[{"name":"getAll","successCallbackIndex":0}],"events":["onCommand"]},"contentSettings":{"functions":[],"events":[]},"contextMenus":{"functions":[{"name":"create","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"removeAll","successCallbackIndex":0}],"events":["onClicked"]},"cookies":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1},{"name":"getAllCookieStores","successCallbackIndex":0}],"events":["onChanged"]},"debugger":{"functions":[{"name":"attach","successCallbackIndex":2},{"name":"detach","successCallbackIndex":1},{"name":"sendCommand","successCallbackIndex":3},{"name":"getTargets","successCallbackIndex":0}],"events":["onEvent","onDetach"]},"declarativeContent":{"functions":[],"events":["onPageChanged"]},"desktopCapture":{"functions":[{"name":"chooseDesktopMedia","successCallbackIndex":2},{"name":"cancelChooseDesktopMedia"}],"events":[]},"devtools.inspectedWindow":{"functions":[{"name":"eval","successCallbackIndex":2},{"name":"reload"},{"name":"getResources","successCallbackIndex":0}],"events":["onResourceAdded","onResourceContentCommitted"]},"devtools.network":{"functions":[{"name":"getHAR","successCallbackIndex":0}],"events":["onRequestFinished","onNavigated"]},"devtools.panels":{"functions":[{"name":"create","successCallbackIndex":3},{"name":"setOpenResourceHandler","successCallbackIndex":0},{"name":"openResource","successCallbackIndex":2}],"events":[]},"downloads":{"functions":[{"name":"download","successCallbackIndex":1},{"name":"search","successCallbackIndex":1},{"name":"pause","successCallbackIndex":1},{"name":"resume","successCallbackIndex":1},{"name":"cancel","successCallbackIndex":1},{"name":"getFileIcon","successCallbackIndex":2},{"name":"open"},{"name":"show"},{"name":"showDefaultFolder"},{"name":"erase","successCallbackIndex":1},{"name":"removeFile","successCallbackIndex":1},{"name":"acceptDanger","successCallbackIndex":1},{"name":"drag"},{"name":"setShelfEnabled"}],"events":["onCreated","onErased","onChanged","onDeterminingFilename"]},"events":{"functions":[],"events":[]},"extension":{"functions":[{"name":"sendRequest"},{"name":"getURL"},{"name":"getViews"},{"name":"getBackgroundPage"},{"name":"getExtensionTabs"},{"name":"isAllowedIncognitoAccess","successCallbackIndex":0},{"name":"isAllowedFileSchemeAccess","successCallbackIndex":0},{"name":"setUpdateUrlData"}],"events":["onRequest","onRequestExternal"]},"extensionTypes":{"functions":[],"events":[]},"fontSettings":{"functions":[{"name":"clearFont","successCallbackIndex":1},{"name":"getFont","successCallbackIndex":1},{"name":"setFont","successCallbackIndex":1},{"name":"getFontList","successCallbackIndex":0},{"name":"clearDefaultFontSize","successCallbackIndex":1},{"name":"getDefaultFontSize","successCallbackIndex":1},{"name":"setDefaultFontSize","successCallbackIndex":1},{"name":"clearDefaultFixedFontSize","successCallbackIndex":1},{"name":"getDefaultFixedFontSize","successCallbackIndex":1},{"name":"setDefaultFixedFontSize","successCallbackIndex":1},{"name":"clearMinimumFontSize","successCallbackIndex":1},{"name":"getMinimumFontSize","successCallbackIndex":1},{"name":"setMinimumFontSize","successCallbackIndex":1}],"events":["onFontChanged","onDefaultFontSizeChanged","onDefaultFixedFontSizeChanged","onMinimumFontSizeChanged"]},"gcm":{"functions":[{"name":"register","successCallbackIndex":1},{"name":"unregister","successCallbackIndex":0},{"name":"send","successCallbackIndex":1}],"events":["onMessage","onMessagesDeleted","onSendError"]},"history":{"functions":[{"name":"search","successCallbackIndex":1},{"name":"getVisits","successCallbackIndex":1},{"name":"addUrl","successCallbackIndex":1},{"name":"deleteUrl","successCallbackIndex":1},{"name":"deleteRange","successCallbackIndex":1},{"name":"deleteAll","successCallbackIndex":0}],"events":["onVisited","onVisitRemoved"]},"i18n":{"functions":[{"name":"getAcceptLanguages","successCallbackIndex":0},{"name":"getMessage"},{"name":"getUILanguage"}],"events":[]},"identity":{"functions":[{"name":"getAccounts","successCallbackIndex":0},{"name":"getAuthToken","successCallbackIndex":1},{"name":"getProfileUserInfo","successCallbackIndex":0},{"name":"removeCachedAuthToken","successCallbackIndex":1},{"name":"launchWebAuthFlow","successCallbackIndex":1},{"name":"getRedirectURL"}],"events":["onSignInChanged"]},"idle":{"functions":[{"name":"queryState","successCallbackIndex":1},{"name":"setDetectionInterval"}],"events":["onStateChanged"]},"management":{"functions":[{"name":"getAll","successCallbackIndex":0},{"name":"get","successCallbackIndex":1},{"name":"getSelf","successCallbackIndex":0},{"name":"getPermissionWarningsById","successCallbackIndex":1},{"name":"getPermissionWarningsByManifest","successCallbackIndex":1},{"name":"setEnabled","successCallbackIndex":2},{"name":"uninstall","successCallbackIndex":2},{"name":"uninstallSelf","successCallbackIndex":1},{"name":"launchApp","successCallbackIndex":1},{"name":"createAppShortcut","successCallbackIndex":1},{"name":"setLaunchType","successCallbackIndex":2},{"name":"generateAppForLink","successCallbackIndex":2}],"events":["onInstalled","onUninstalled","onEnabled","onDisabled"]},"notifications":{"functions":[{"name":"create","successCallbackIndex":2},{"name":"update","successCallbackIndex":2},{"name":"clear","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":0},{"name":"getPermissionLevel","successCallbackIndex":0}],"events":["onClosed","onClicked","onButtonClicked","onPermissionLevelChanged","onShowSettings"]},"omnibox":{"functions":[{"name":"sendSuggestions"},{"name":"setDefaultSuggestion"}],"events":["onInputStarted","onInputChanged","onInputEntered","onInputCancelled"]},"pageAction":{"functions":[{"name":"show"},{"name":"hide"},{"name":"setTitle"},{"name":"getTitle","successCallbackIndex":1},{"name":"setIcon","successCallbackIndex":1},{"name":"setPopup"},{"name":"getPopup","successCallbackIndex":1}],"events":["onClicked"]},"pageCapture":{"functions":[{"name":"saveAsMHTML","successCallbackIndex":1}],"events":[]},"permissions":{"functions":[{"name":"getAll","successCallbackIndex":0},{"name":"contains","successCallbackIndex":1},{"name":"request","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1}],"events":["onAdded","onRemoved"]},"power":{"functions":[{"name":"requestKeepAwake"},{"name":"releaseKeepAwake"}],"events":[]},"privacy":{"functions":[],"events":[]},"proxy":{"functions":[],"events":["onProxyError"]},"runtime":{"functions":[{"name":"getBackgroundPage","successCallbackIndex":0},{"name":"openOptionsPage","successCallbackIndex":0},{"name":"getManifest"},{"name":"getURL"},{"name":"setUninstallURL"},{"name":"reload"},{"name":"requestUpdateCheck","successCallbackIndex":0},{"name":"restart"},{"name":"connect"},{"name":"connectNative"},{"name":"sendMessage"},{"name":"sendNativeMessage"},{"name":"getPlatformInfo","successCallbackIndex":0},{"name":"getPackageDirectoryEntry","successCallbackIndex":0}],"events":["onStartup","onInstalled","onSuspend","onSuspendCanceled","onUpdateAvailable","onBrowserUpdateAvailable","onConnect","onConnectExternal","onMessage","onMessageExternal","onRestartRequired"]},"sessions":{"functions":[{"name":"getRecentlyClosed","successCallbackIndex":1},{"name":"getDevices","successCallbackIndex":1},{"name":"restore","successCallbackIndex":1}],"events":["onChanged"]},"storage":{"functions":[],"events":["onChanged"]},"system.cpu":{"functions":[{"name":"getInfo","successCallbackIndex":0}],"events":[]},"system.memory":{"functions":[{"name":"getInfo","successCallbackIndex":0}],"events":[]},"system.storage":{"functions":[{"name":"getInfo","successCallbackIndex":0},{"name":"ejectDevice","successCallbackIndex":1},{"name":"getAvailableCapacity","successCallbackIndex":1}],"events":["onAttached","onDetached"]},"tabCapture":{"functions":[{"name":"capture","successCallbackIndex":1},{"name":"getCapturedTabs","successCallbackIndex":0}],"events":["onStatusChanged"]},"tabs":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getCurrent","successCallbackIndex":0},{"name":"connect"},{"name":"sendRequest"},{"name":"sendMessage"},{"name":"getSelected","successCallbackIndex":1},{"name":"getAllInWindow","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"duplicate","successCallbackIndex":1},{"name":"query","successCallbackIndex":1},{"name":"highlight","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"move","successCallbackIndex":2},{"name":"reload","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"detectLanguage","successCallbackIndex":1},{"name":"captureVisibleTab","successCallbackIndex":2},{"name":"executeScript","successCallbackIndex":2},{"name":"insertCSS","successCallbackIndex":2},{"name":"setZoom","successCallbackIndex":2},{"name":"getZoom","successCallbackIndex":1},{"name":"setZoomSettings","successCallbackIndex":2},{"name":"getZoomSettings","successCallbackIndex":1}],"events":["onCreated","onUpdated","onMoved","onSelectionChanged","onActiveChanged","onActivated","onHighlightChanged","onHighlighted","onDetached","onAttached","onRemoved","onReplaced","onZoomChange"]},"topSites":{"functions":[{"name":"get","successCallbackIndex":0}],"events":[]},"tts":{"functions":[{"name":"speak","successCallbackIndex":2},{"name":"stop"},{"name":"pause"},{"name":"resume"},{"name":"isSpeaking","successCallbackIndex":0},{"name":"getVoices","successCallbackIndex":0}],"events":["onEvent"]},"ttsEngine":{"functions":[{"name":"sendTtsEvent"}],"events":["onSpeak","onStop","onPause","onResume"]},"types":{"functions":[],"events":[]},"wallpaper":{"functions":[{"name":"setWallpaper","successCallbackIndex":1}],"events":[]},"webNavigation":{"functions":[{"name":"getFrame","successCallbackIndex":1},{"name":"getAllFrames","successCallbackIndex":1}],"events":["onBeforeNavigate","onCommitted","onDOMContentLoaded","onCompleted","onErrorOccurred","onCreatedNavigationTarget","onReferenceFragmentUpdated","onTabReplaced","onHistoryStateUpdated"]},"webRequest":{"functions":[{"name":"handlerBehaviorChanged","successCallbackIndex":0}],"events":["onBeforeRequest","onBeforeSendHeaders","onSendHeaders","onHeadersReceived","onAuthRequired","onResponseStarted","onBeforeRedirect","onCompleted","onErrorOccurred"]},"webstore":{"functions":[{"name":"install","successCallbackIndex":1,"failureCallbackIndex":2}],"events":["onInstallStageChanged","onDownloadProgress"]},"windows":{"functions":[{"name":"get","successCallbackIndex":2},{"name":"getCurrent","successCallbackIndex":1},{"name":"getLastFocused","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1}],"events":["onCreated","onRemoved","onFocusChanged"]}}
 /**
  * The last piece injected into the content, takes the definition stub
@@ -66,11 +182,12 @@ JETPACK.API_DEFINITIONS = {"alarms":{"functions":[{"name":"create"},{"name":"get
  * and creates the API objects and function/event hooks in the proper scope.
  */
 let definitions = JETPACK.API_DEFINITIONS;
-let chrome = createObjectIn(unsafeWindow, { defineAs: "chrome" });
+let chrome = unsafeWindow.chrome = createObjectIn(unsafeWindow);
 
 Object.keys(definitions).forEach(namespace => {
   let def = definitions[namespace];
   bindFunctions(namespace, def.functions);
+  bindEvents(namespace, def.events);
 });
 
 /**
@@ -98,5 +215,16 @@ function bindFunctions (namespace, functions=[]) {
   functions.forEach(fnDef => {
     let { name: method, successCallbackIndex: success, failureCallbackIndex: failure } = fnDef;
     exportFunction(JETPACK.RPC.bind(null, { namespace, method, success, failure }), ns, { defineAs: method });
+  });
+}
+
+function bindEvents (namespace, events=[]) {
+  let ns = getNamespace(namespace);
+  events.forEach(name => {
+    // EventManager.getEvent caches the event instance,
+    // so we can lazily load event objects
+    Object.defineProperty(ns, name, {
+      get: exportFunction(() => JETPACK.EventManager.getEvent(`${namespace}.${name}`).getShadow(), ns)
+    });
   });
 }
