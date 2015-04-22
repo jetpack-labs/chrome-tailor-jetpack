@@ -430,6 +430,30 @@
       }
     ],
     "events": [],
+    "types": {
+      "ElementsPanel": {
+        "functions": [
+          {
+            "name": "createSidebarPane",
+            "successCallbackIndex": 1
+          }
+        ],
+        "events": [
+          "onSelectionChanged"
+        ]
+      },
+      "SourcesPanel": {
+        "functions": [
+          {
+            "name": "createSidebarPane",
+            "successCallbackIndex": 1
+          }
+        ],
+        "events": [
+          "onSelectionChanged"
+        ]
+      }
+    },
     "properties": {
       "elements": {
         "class": "ElementsPanel"

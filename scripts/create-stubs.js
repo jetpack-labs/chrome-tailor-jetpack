@@ -100,7 +100,10 @@ function createTypeDefinition (types) {
   var filtered = types.filter(function (type) {
     // Only save types that have an associated js_module, like
     // ChromeSettings, ContentSettings, StorageArea
-    return type.js_module;
+    //
+    // or in the devtools case, ElementsPanel and SourcesPanel, as they are
+    // the only ones directly exposed by `devtools.panels.*`
+    return type.js_module || ~["ElementsPanel", "SourcesPanel"].indexOf(type.id);
   });
 
   if ((filtered || []).length === 0) {
