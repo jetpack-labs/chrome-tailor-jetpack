@@ -222,6 +222,29 @@
   "contentSettings": {
     "functions": [],
     "events": [],
+    "types": {
+      "ContentSetting": {
+        "functions": [
+          {
+            "name": "clear",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "get",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "set",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "getResourceIdentifiers",
+            "successCallbackIndex": 0
+          }
+        ],
+        "events": []
+      }
+    },
     "properties": {
       "cookies": {
         "class": "ContentSetting"
@@ -1074,6 +1097,33 @@
     "events": [
       "onChanged"
     ],
+    "types": {
+      "StorageArea": {
+        "functions": [
+          {
+            "name": "get",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "getBytesInUse",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "set",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "remove",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "clear",
+            "successCallbackIndex": 0
+          }
+        ],
+        "events": []
+      }
+    },
     "properties": {
       "sync": {
         "class": "StorageArea",
@@ -1324,7 +1374,28 @@
   },
   "types": {
     "functions": [],
-    "events": []
+    "events": [],
+    "types": {
+      "ChromeSetting": {
+        "functions": [
+          {
+            "name": "get",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "set",
+            "successCallbackIndex": 1
+          },
+          {
+            "name": "clear",
+            "successCallbackIndex": 1
+          }
+        ],
+        "events": [
+          "onChange"
+        ]
+      }
+    }
   },
   "wallpaper": {
     "functions": [

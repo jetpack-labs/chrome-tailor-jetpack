@@ -15,17 +15,20 @@ var STUB_PATH = path.join(__dirname, "..", "definitions", "stubs.json");
 
 var definitions = ChromeAPIDefinitions.getDefinitions({ filter: "stable" });
 
-var output = definitions.reduce(function (output, def) {
-  var namespace = output[def.namespace] = {};
-  namespace.functions = (def.functions || []).map(createFunctionDefinition);
-  namespace.events = (def.events || []).map(createEventDefinition);
-  namespace.properties = createPropertyDefinition(def.properties || {});
-  return output;
-}, {});
-
+var output = createDefinition(definitions, "namespace");
 output = JSON.stringify(output, null, 2);
-
 fs.writeFileSync(STUB_PATH, output);
+
+function createDefinition (definitions, nameField) {
+  return (definitions || []).reduce(function (output, def) {
+    var namespace = output[def[nameField]] = {};
+    namespace.functions = (def.functions || []).map(createFunctionDefinition);
+    namespace.events = (def.events || []).map(createEventDefinition);
+    namespace.types = createTypeDefinition(def.types || []);
+    namespace.properties = createPropertyDefinition(def.properties || {});
+    return output;
+  }, {});
+}
 
 function createFunctionDefinition (fn) {
   var paramStub = { name: fn.name };
@@ -91,4 +94,18 @@ function createPropertyDefinition (props) {
 
     return result;
   }, {});
+}
+
+function createTypeDefinition (types) {
+  var filtered = types.filter(function (type) {
+    // Only save types that have an associated js_module, like
+    // ChromeSettings, ContentSettings, StorageArea
+    return type.js_module;
+  });
+
+  if ((filtered || []).length === 0) {
+    return void 0;
+  }
+
+  return createDefinition(filtered, "id");
 }
