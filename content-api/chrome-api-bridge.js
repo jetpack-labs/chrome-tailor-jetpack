@@ -5,6 +5,15 @@
  * Handles the message communication with the main Jetpack proc.
  */
 let INC_ID = 0;
+let CustomDefinitions = new Map();
+
+JETPACK.getCustomDefinition = function (name) {
+  return CustomDefinitions.get(name);
+};
+
+JETPACK.setCustomDefinition = function (name, fn) {
+  CustomDefinitions.set(name, fn);
+};
 
 JETPACK.RPC = function (config) {
   var id = INC_ID++;

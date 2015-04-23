@@ -48,6 +48,14 @@ function bindFunctions (namespace, functions=[]) {
   functions.forEach(fnDef => {
     let { name: method, successCallbackIndex: success, failureCallbackIndex: failure } = fnDef;
     let name = `${namespace}.${method}`;
+    let custom;
+
+    // Check to see if this function is manually defined
+    if (custom = JETPACK.getCustomDefinition(name)) {
+      exportFunction(custom, ns, { defineAs: method });
+      return;
+    }
+
     exportFunction(JETPACK.RPC.bind(null, { name, success, failure }), ns, { defineAs: method });
   });
 }
