@@ -13,7 +13,9 @@ var path = require("path");
 var ChromeAPIDefinitions = require("chrome-api-definitions");
 var STUB_PATH = path.join(__dirname, "..", "definitions", "stubs.json");
 
-var definitions = ChromeAPIDefinitions.getDefinitions({ filter: "stable" });
+var StableAPI = require("chrome-api-definitions/api-names.json").stable;
+// Manually add "test" module
+var definitions = ChromeAPIDefinitions.getDefinitions({ filter: StableAPI.concat("test") });
 
 var output = createDefinition(definitions, "namespace");
 output = JSON.stringify(output, null, 2);

@@ -1534,5 +1534,112 @@
         "value": -2
       }
     }
+  },
+  "test": {
+    "functions": [
+      {
+        "name": "getConfig",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "notifyFail"
+      },
+      {
+        "name": "notifyPass"
+      },
+      {
+        "name": "log"
+      },
+      {
+        "name": "sendMessage",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "callbackAdded"
+      },
+      {
+        "name": "runNextTest"
+      },
+      {
+        "name": "fail"
+      },
+      {
+        "name": "succeed"
+      },
+      {
+        "name": "runWithModuleSystem",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "assertTrue"
+      },
+      {
+        "name": "assertFalse"
+      },
+      {
+        "name": "assertBool"
+      },
+      {
+        "name": "checkDeepEq"
+      },
+      {
+        "name": "assertEq"
+      },
+      {
+        "name": "assertNoLastError"
+      },
+      {
+        "name": "assertLastError"
+      },
+      {
+        "name": "assertThrows"
+      },
+      {
+        "name": "callback"
+      },
+      {
+        "name": "listenOnce"
+      },
+      {
+        "name": "listenForever"
+      },
+      {
+        "name": "callbackPass"
+      },
+      {
+        "name": "callbackFail"
+      },
+      {
+        "name": "runTests"
+      },
+      {
+        "name": "getApiFeatures"
+      },
+      {
+        "name": "getApiDefinitions"
+      },
+      {
+        "name": "isProcessingUserGesture"
+      },
+      {
+        "name": "runWithUserGesture",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "runWithoutUserGesture",
+        "successCallbackIndex": 0
+      },
+      {
+        "name": "waitForRoundTrip",
+        "successCallbackIndex": 1
+      },
+      {
+        "name": "setExceptionHandler",
+        "successCallbackIndex": 0
+      }
+    ],
+    "events": [
+      "onMessage"
+    ]
   }
 }
