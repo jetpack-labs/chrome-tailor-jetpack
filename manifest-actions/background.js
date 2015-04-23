@@ -5,8 +5,9 @@
 
 const self = require("sdk/self");
 const pageWorker = require("sdk/page-worker");
-const events = require("sdk/system/events");
-const { attach } = require("../lib/chrome-api-controller");
+const { on, emit } = require("sdk/event/core");
+const systemEvents = require("sdk/system/events");
+const { attach, events } = require("../lib/chrome-api-controller");
 
 function create(options) {
   let pageURL = options.page || self.data.url("default-background.html");
@@ -25,14 +26,16 @@ function create(options) {
   });
 
   attach({ target: backgroundPage });
+  on(events, "chrome-api:notifyPass", (count) => emit(backgroundPage, "chrome-api:notifyPass", count));
+  on(events, "chrome-api:notifyFail", (msg) => emit(backgroundPage, "chrome-api:notifyFail", fail));
 
   function unloadWait(event) {
     if (event.subject.name == manifest.name) {
       backgroundPage.destroy();
-      events.off("crx-unload", unloadWait, true);
+      systemEvents.off("crx-unload", unloadWait, true);
     }
   }
-  events.on("crx-unload", unloadWait, true);
+  systemEvents.on("crx-unload", unloadWait, true);
 
   return backgroundPage;
 }

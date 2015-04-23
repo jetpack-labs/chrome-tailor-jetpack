@@ -62,6 +62,15 @@ JETPACK.Class = Class;
  * Handles the message communication with the main Jetpack proc.
  */
 let INC_ID = 0;
+let CustomDefinitions = new Map();
+
+JETPACK.getCustomDefinition = function (name) {
+  return CustomDefinitions.get(name);
+};
+
+JETPACK.setCustomDefinition = function (name, fn) {
+  CustomDefinitions.set(name, fn);
+};
 
 JETPACK.RPC = function (config) {
   var id = INC_ID++;
@@ -101,6 +110,414 @@ JETPACK.RPC = function (config) {
 function cleanse (obj) {
   return unsafeWindow.JSON.parse(JSON.stringify(obj));
 }
+
+})();
+
+(function(){
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// test_custom_bindings.js
+// mini-framework for ExtensionApiTest browser tests
+
+/**
+ * Forked to work in Firefox content scripts.
+ */
+
+/*
+var binding = require('binding').Binding.create('test');
+
+var environmentSpecificBindings = require('test_environment_specific_bindings');
+var GetExtensionAPIDefinitionsForTest =
+    requireNative('apiDefinitions').GetExtensionAPIDefinitionsForTest;
+var GetAPIFeatures = requireNative('test_features').GetAPIFeatures;
+var uncaughtExceptionHandler = require('uncaught_exception_handler');
+var userGestures = requireNative('user_gestures');
+
+var RunWithNativesEnabledModuleSystem =
+    requireNative('v8_context').RunWithNativesEnabledModuleSystem;
+*/
+
+const API = {
+  compiledApi: {},
+  apiFunctions: {
+    setHandleRequest: (name, fn) => {
+      // Expose to content
+      JETPACK.setCustomDefinition(`test.${name}`, fn);
+      // Also set to compiledAPI
+      API.compiledApi[name] = fn;
+    }
+  }
+};
+
+API.apiFunctions.setHandleRequest("notifyPass", function notifyPass (count) {
+  self.port.emit("chrome-api-test:notifyPass", count);
+});
+
+API.apiFunctions.setHandleRequest("notifyFail", function notifyFail (message) {
+  self.port.emit("chrome-api-test:notifyFail", message);
+});
+
+API.apiFunctions.setHandleRequest("notifyFail", function notifyFail (message) {
+  self.port.emit("chrome-api-test:log", message);
+});
+
+// Stubs for Chromium implementation
+let environmentSpecificBindings = {
+  registerHooks: () => {},
+  testDone: (fn) => fn()
+};
+
+let uncaughtExceptionHandler = { setHandler: (fn) => fn(), handle: () => ({}) };
+let userGestures = {
+  RunWithoutUserGesture: (fn) => fn(),
+  RunWithUserGesture: (fn) => fn(),
+  IsProcessingUserGesture: () => {},
+};
+
+let GetExtensionAPIDefinitionsForTest = () => ({});
+let GetAPIFeatures = () => ({});
+let $Object = Object;
+let $JSON = JSON;
+let $Function = Function;
+
+//binding.registerCustomHook(function(api) {
+(function (api) {
+  var chromeTest = api.compiledApi;
+  var apiFunctions = api.apiFunctions;
+
+  chromeTest.tests = chromeTest.tests || [];
+
+  var currentTest = null;
+  var lastTest = null;
+  var testsFailed = 0;
+  var testCount = 1;
+  var failureException = 'chrome.test.failure';
+
+  // Helper function to get around the fact that function names in javascript
+  // are read-only, and you can't assign one to anonymous functions.
+  function testName(test) {
+    return test ? (test.name || test.generatedName) : "(no test)";
+  }
+
+  function testDone() {
+    environmentSpecificBindings.testDone(chromeTest.runNextTest);
+  }
+
+  function allTestsDone() {
+    if (testsFailed == 0) {
+      chromeTest.notifyPass(testCount);
+    } else {
+      chromeTest.notifyFail('Failed ' + testsFailed + ' of ' +
+                             testCount + ' tests');
+    }
+  }
+
+  var pendingCallbacks = 0;
+
+  apiFunctions.setHandleRequest('callbackAdded', function() {
+    pendingCallbacks++;
+
+    var called = null;
+    return function() {
+      if (called != null) {
+        var redundantPrefix = 'Error\n';
+        chromeTest.fail(
+          'Callback has already been run. ' +
+          'First call:\n' +
+          $String.slice(called, redundantPrefix.length) + '\n' +
+          'Second call:\n' +
+          $String.slice(new Error().stack, redundantPrefix.length));
+      }
+      called = new Error().stack;
+
+      pendingCallbacks--;
+      if (pendingCallbacks == 0) {
+        chromeTest.succeed();
+      }
+    };
+  });
+
+  apiFunctions.setHandleRequest('runNextTest', function() {
+    // There may have been callbacks which were interrupted by failure
+    // exceptions.
+    pendingCallbacks = 0;
+
+    lastTest = currentTest;
+    currentTest = chromeTest.tests.shift();
+
+    if (!currentTest) {
+      allTestsDone();
+      return;
+    }
+
+    try {
+      chromeTest.log("( RUN      ) " + testName(currentTest));
+      uncaughtExceptionHandler.setHandler(function(message, e) {
+        if (e !== failureException)
+          chromeTest.fail('uncaught exception: ' + message);
+      });
+      currentTest.call();
+    } catch (e) {
+      uncaughtExceptionHandler.handle(e.message, e);
+    }
+  });
+
+  apiFunctions.setHandleRequest('fail', function(message) {
+    chromeTest.log("(  FAILED  ) " + testName(currentTest));
+
+    var stack = {};
+    Error.captureStackTrace(stack, chromeTest.fail);
+
+    if (!message)
+      message = "FAIL (no message)";
+
+    message += "\n" + stack.stack;
+    console.log("[FAIL] " + testName(currentTest) + ": " + message);
+    testsFailed++;
+    testDone();
+
+    // Interrupt the rest of the test.
+    throw failureException;
+  });
+
+  apiFunctions.setHandleRequest('succeed', function() {
+    console.log("[SUCCESS] " + testName(currentTest));
+    chromeTest.log("(  SUCCESS )");
+    testDone();
+  });
+
+  apiFunctions.setHandleRequest('runWithModuleSystem', function(callback) {
+    RunWithNativesEnabledModuleSystem(callback);
+  });
+
+  apiFunctions.setHandleRequest('assertTrue', function(test, message) {
+    chromeTest.assertBool(test, true, message);
+  });
+
+  apiFunctions.setHandleRequest('assertFalse', function(test, message) {
+    chromeTest.assertBool(test, false, message);
+  });
+
+  apiFunctions.setHandleRequest('assertBool',
+                                function(test, expected, message) {
+    if (test !== expected) {
+      if (typeof(test) == "string") {
+        if (message)
+          message = test + "\n" + message;
+        else
+          message = test;
+      }
+      chromeTest.fail(message);
+    }
+  });
+
+  apiFunctions.setHandleRequest('checkDeepEq', function(expected, actual) {
+    if ((expected === null) != (actual === null))
+      return false;
+
+    if (expected === actual)
+      return true;
+
+    if (typeof(expected) !== typeof(actual))
+      return false;
+
+    for (var p in actual) {
+      if ($Object.hasOwnProperty(actual, p) &&
+          !$Object.hasOwnProperty(expected, p)) {
+        return false;
+      }
+    }
+    for (var p in expected) {
+      if ($Object.hasOwnProperty(expected, p) &&
+          !$Object.hasOwnProperty(actual, p)) {
+        return false;
+      }
+    }
+
+    for (var p in expected) {
+      var eq = true;
+      switch (typeof(expected[p])) {
+        case 'object':
+          eq = chromeTest.checkDeepEq(expected[p], actual[p]);
+          break;
+        case 'function':
+          eq = (typeof(actual[p]) != 'undefined' &&
+                expected[p].toString() == actual[p].toString());
+          break;
+        default:
+          eq = (expected[p] == actual[p] &&
+                typeof(expected[p]) == typeof(actual[p]));
+          break;
+      }
+      if (!eq)
+        return false;
+    }
+    return true;
+  });
+
+  apiFunctions.setHandleRequest('assertEq',
+                                function(expected, actual, message) {
+    var error_msg = "API Test Error in " + testName(currentTest);
+    if (message)
+      error_msg += ": " + message;
+    if (typeof(expected) == 'object') {
+      if (!chromeTest.checkDeepEq(expected, actual)) {
+        error_msg += "\nActual: " + $JSON.stringify(actual) +
+                     "\nExpected: " + $JSON.stringify(expected);
+        chromeTest.fail(error_msg);
+      }
+      return;
+    }
+    if (expected != actual) {
+      chromeTest.fail(error_msg +
+                       "\nActual: " + actual + "\nExpected: " + expected);
+    }
+    if (typeof(expected) != typeof(actual)) {
+      chromeTest.fail(error_msg +
+                       " (type mismatch)\nActual Type: " + typeof(actual) +
+                       "\nExpected Type:" + typeof(expected));
+    }
+  });
+
+  apiFunctions.setHandleRequest('assertNoLastError', function() {
+    if (chrome.runtime.lastError != undefined) {
+      chromeTest.fail("lastError.message == " +
+                       chrome.runtime.lastError.message);
+    }
+  });
+
+  apiFunctions.setHandleRequest('assertLastError', function(expectedError) {
+    chromeTest.assertEq(typeof(expectedError), 'string');
+    chromeTest.assertTrue(chrome.runtime.lastError != undefined,
+        "No lastError, but expected " + expectedError);
+    chromeTest.assertEq(expectedError, chrome.runtime.lastError.message);
+  });
+
+  apiFunctions.setHandleRequest('assertThrows',
+                                function(fn, self, args, message) {
+    chromeTest.assertTrue(typeof fn == 'function');
+    try {
+      fn.apply(self, args);
+      chromeTest.fail('Did not throw error: ' + fn);
+    } catch (e) {
+      if (e != failureException && message !== undefined) {
+        if (message instanceof RegExp) {
+          chromeTest.assertTrue(message.test(e.message),
+                                e.message + ' should match ' + message)
+        } else {
+          chromeTest.assertEq(message, e.message);
+        }
+      }
+    }
+  });
+
+  function safeFunctionApply(func, args) {
+    try {
+      if (func)
+        return $Function.apply(func, undefined, args);
+    } catch (e) {
+      var msg = "uncaught exception " + e;
+      chromeTest.fail(msg);
+    }
+  };
+
+  // Wrapper for generating test functions, that takes care of calling
+  // assertNoLastError() and (optionally) succeed() for you.
+  apiFunctions.setHandleRequest('callback', function(func, expectedError) {
+    if (func) {
+      chromeTest.assertEq(typeof(func), 'function');
+    }
+    var callbackCompleted = chromeTest.callbackAdded();
+
+    return function() {
+      if (expectedError == null) {
+        chromeTest.assertNoLastError();
+      } else {
+        chromeTest.assertLastError(expectedError);
+      }
+
+      var result;
+      if (func) {
+        result = safeFunctionApply(func, arguments);
+      }
+
+      callbackCompleted();
+      return result;
+    };
+  });
+
+  apiFunctions.setHandleRequest('listenOnce', function(event, func) {
+    var callbackCompleted = chromeTest.callbackAdded();
+    var listener = function() {
+      event.removeListener(listener);
+      safeFunctionApply(func, arguments);
+      callbackCompleted();
+    };
+    event.addListener(listener);
+  });
+
+  apiFunctions.setHandleRequest('listenForever', function(event, func) {
+    var callbackCompleted = chromeTest.callbackAdded();
+
+    var listener = function() {
+      safeFunctionApply(func, arguments);
+    };
+
+    var done = function() {
+      event.removeListener(listener);
+      callbackCompleted();
+    };
+
+    event.addListener(listener);
+    return done;
+  });
+
+  apiFunctions.setHandleRequest('callbackPass', function(func) {
+    return chromeTest.callback(func);
+  });
+
+  apiFunctions.setHandleRequest('callbackFail', function(expectedError, func) {
+    return chromeTest.callback(func, expectedError);
+  });
+
+  apiFunctions.setHandleRequest('runTests', function(tests) {
+    console.log("RUN TESTS!!!!", tests);
+    chromeTest.tests = tests;
+    testCount = chromeTest.tests.length;
+    chromeTest.runNextTest();
+  });
+
+  apiFunctions.setHandleRequest('getApiDefinitions', function() {
+    return GetExtensionAPIDefinitionsForTest();
+  });
+
+  apiFunctions.setHandleRequest('getApiFeatures', function() {
+    return GetAPIFeatures();
+  });
+
+  apiFunctions.setHandleRequest('isProcessingUserGesture', function() {
+    return userGestures.IsProcessingUserGesture();
+  });
+
+  apiFunctions.setHandleRequest('runWithUserGesture', function(callback) {
+    chromeTest.assertEq(typeof(callback), 'function');
+    return userGestures.RunWithUserGesture(callback);
+  });
+
+  apiFunctions.setHandleRequest('runWithoutUserGesture', function(callback) {
+    chromeTest.assertEq(typeof(callback), 'function');
+    return userGestures.RunWithoutUserGesture(callback);
+  });
+
+  apiFunctions.setHandleRequest('setExceptionHandler', function(callback) {
+    chromeTest.assertEq(typeof(callback), 'function');
+    uncaughtExceptionHandler.setHandler(callback);
+  });
+
+  environmentSpecificBindings.registerHooks(api);
+})(API);
 
 })();
 
@@ -175,7 +592,7 @@ let Event = JETPACK.Class({
 });
 
 })();
-JETPACK.API_DEFINITIONS = {"alarms":{"functions":[{"name":"create"},{"name":"get","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":0},{"name":"clear","successCallbackIndex":1},{"name":"clearAll","successCallbackIndex":0}],"events":["onAlarm"]},"bookmarks":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getChildren","successCallbackIndex":1},{"name":"getRecent","successCallbackIndex":1},{"name":"getTree","successCallbackIndex":0},{"name":"getSubTree","successCallbackIndex":1},{"name":"search","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"move","successCallbackIndex":2},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"removeTree","successCallbackIndex":1},{"name":"import","successCallbackIndex":0},{"name":"export","successCallbackIndex":0}],"events":["onCreated","onRemoved","onChanged","onMoved","onChildrenReordered","onImportBegan","onImportEnded"],"properties":{"MAX_WRITE_OPERATIONS_PER_HOUR":{"value":1000000},"MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE":{"value":1000000}}},"browserAction":{"functions":[{"name":"setTitle"},{"name":"getTitle","successCallbackIndex":1},{"name":"setIcon","successCallbackIndex":1},{"name":"setPopup"},{"name":"getPopup","successCallbackIndex":1},{"name":"setBadgeText"},{"name":"getBadgeText","successCallbackIndex":1},{"name":"setBadgeBackgroundColor"},{"name":"getBadgeBackgroundColor","successCallbackIndex":1},{"name":"enable"},{"name":"disable"},{"name":"openPopup","successCallbackIndex":0}],"events":["onClicked"]},"browsingData":{"functions":[{"name":"settings","successCallbackIndex":0},{"name":"remove","successCallbackIndex":2},{"name":"removeAppcache","successCallbackIndex":1},{"name":"removeCache","successCallbackIndex":1},{"name":"removeCookies","successCallbackIndex":1},{"name":"removeDownloads","successCallbackIndex":1},{"name":"removeFileSystems","successCallbackIndex":1},{"name":"removeFormData","successCallbackIndex":1},{"name":"removeHistory","successCallbackIndex":1},{"name":"removeIndexedDB","successCallbackIndex":1},{"name":"removeLocalStorage","successCallbackIndex":1},{"name":"removePluginData","successCallbackIndex":1},{"name":"removePasswords","successCallbackIndex":1},{"name":"removeWebSQL","successCallbackIndex":1}],"events":[]},"commands":{"functions":[{"name":"getAll","successCallbackIndex":0}],"events":["onCommand"]},"contentSettings":{"functions":[],"events":[],"types":{"ContentSetting":{"functions":[{"name":"clear","successCallbackIndex":1},{"name":"get","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"getResourceIdentifiers","successCallbackIndex":0}],"events":[]}},"properties":{"cookies":{"class":"ContentSetting"},"images":{"class":"ContentSetting"},"javascript":{"class":"ContentSetting"},"location":{"class":"ContentSetting"},"plugins":{"class":"ContentSetting"},"popups":{"class":"ContentSetting"},"notifications":{"class":"ContentSetting"},"fullscreen":{"class":"ContentSetting"},"mouselock":{"class":"ContentSetting"},"unsandboxedPlugins":{"class":"ContentSetting"},"automaticDownloads":{"class":"ContentSetting"}}},"contextMenus":{"functions":[{"name":"create","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"removeAll","successCallbackIndex":0}],"events":["onClicked"],"properties":{"ACTION_MENU_TOP_LEVEL_LIMIT":{"value":6}}},"cookies":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1},{"name":"getAllCookieStores","successCallbackIndex":0}],"events":["onChanged"]},"debugger":{"functions":[{"name":"attach","successCallbackIndex":2},{"name":"detach","successCallbackIndex":1},{"name":"sendCommand","successCallbackIndex":3},{"name":"getTargets","successCallbackIndex":0}],"events":["onEvent","onDetach"]},"declarativeContent":{"functions":[],"events":["onPageChanged"]},"desktopCapture":{"functions":[{"name":"chooseDesktopMedia","successCallbackIndex":2},{"name":"cancelChooseDesktopMedia"}],"events":[]},"devtools.inspectedWindow":{"functions":[{"name":"eval","successCallbackIndex":2},{"name":"reload"},{"name":"getResources","successCallbackIndex":0}],"events":["onResourceAdded","onResourceContentCommitted"],"properties":{"tabId":{"getter":true}}},"devtools.network":{"functions":[{"name":"getHAR","successCallbackIndex":0}],"events":["onRequestFinished","onNavigated"]},"devtools.panels":{"functions":[{"name":"create","successCallbackIndex":3},{"name":"setOpenResourceHandler","successCallbackIndex":0},{"name":"openResource","successCallbackIndex":2}],"events":[],"types":{"ElementsPanel":{"functions":[{"name":"createSidebarPane","successCallbackIndex":1}],"events":["onSelectionChanged"]},"SourcesPanel":{"functions":[{"name":"createSidebarPane","successCallbackIndex":1}],"events":["onSelectionChanged"]}},"properties":{"elements":{"class":"ElementsPanel"},"sources":{"class":"SourcesPanel"}}},"downloads":{"functions":[{"name":"download","successCallbackIndex":1},{"name":"search","successCallbackIndex":1},{"name":"pause","successCallbackIndex":1},{"name":"resume","successCallbackIndex":1},{"name":"cancel","successCallbackIndex":1},{"name":"getFileIcon","successCallbackIndex":2},{"name":"open"},{"name":"show"},{"name":"showDefaultFolder"},{"name":"erase","successCallbackIndex":1},{"name":"removeFile","successCallbackIndex":1},{"name":"acceptDanger","successCallbackIndex":1},{"name":"drag"},{"name":"setShelfEnabled"}],"events":["onCreated","onErased","onChanged","onDeterminingFilename"]},"events":{"functions":[],"events":[]},"extension":{"functions":[{"name":"sendRequest"},{"name":"getURL"},{"name":"getViews"},{"name":"getBackgroundPage"},{"name":"getExtensionTabs"},{"name":"isAllowedIncognitoAccess","successCallbackIndex":0},{"name":"isAllowedFileSchemeAccess","successCallbackIndex":0},{"name":"setUpdateUrlData"}],"events":["onRequest","onRequestExternal"],"properties":{"lastError":{"getter":true,"properties":{"message":{"getter":true}}},"inIncognitoContext":{"getter":true}}},"extensionTypes":{"functions":[],"events":[]},"fontSettings":{"functions":[{"name":"clearFont","successCallbackIndex":1},{"name":"getFont","successCallbackIndex":1},{"name":"setFont","successCallbackIndex":1},{"name":"getFontList","successCallbackIndex":0},{"name":"clearDefaultFontSize","successCallbackIndex":1},{"name":"getDefaultFontSize","successCallbackIndex":1},{"name":"setDefaultFontSize","successCallbackIndex":1},{"name":"clearDefaultFixedFontSize","successCallbackIndex":1},{"name":"getDefaultFixedFontSize","successCallbackIndex":1},{"name":"setDefaultFixedFontSize","successCallbackIndex":1},{"name":"clearMinimumFontSize","successCallbackIndex":1},{"name":"getMinimumFontSize","successCallbackIndex":1},{"name":"setMinimumFontSize","successCallbackIndex":1}],"events":["onFontChanged","onDefaultFontSizeChanged","onDefaultFixedFontSizeChanged","onMinimumFontSizeChanged"]},"gcm":{"functions":[{"name":"register","successCallbackIndex":1},{"name":"unregister","successCallbackIndex":0},{"name":"send","successCallbackIndex":1}],"events":["onMessage","onMessagesDeleted","onSendError"],"properties":{"MAX_MESSAGE_SIZE":{"value":4096}}},"history":{"functions":[{"name":"search","successCallbackIndex":1},{"name":"getVisits","successCallbackIndex":1},{"name":"addUrl","successCallbackIndex":1},{"name":"deleteUrl","successCallbackIndex":1},{"name":"deleteRange","successCallbackIndex":1},{"name":"deleteAll","successCallbackIndex":0}],"events":["onVisited","onVisitRemoved"]},"i18n":{"functions":[{"name":"getAcceptLanguages","successCallbackIndex":0},{"name":"getMessage"},{"name":"getUILanguage"}],"events":[]},"identity":{"functions":[{"name":"getAccounts","successCallbackIndex":0},{"name":"getAuthToken","successCallbackIndex":1},{"name":"getProfileUserInfo","successCallbackIndex":0},{"name":"removeCachedAuthToken","successCallbackIndex":1},{"name":"launchWebAuthFlow","successCallbackIndex":1},{"name":"getRedirectURL"}],"events":["onSignInChanged"]},"idle":{"functions":[{"name":"queryState","successCallbackIndex":1},{"name":"setDetectionInterval"}],"events":["onStateChanged"]},"management":{"functions":[{"name":"getAll","successCallbackIndex":0},{"name":"get","successCallbackIndex":1},{"name":"getSelf","successCallbackIndex":0},{"name":"getPermissionWarningsById","successCallbackIndex":1},{"name":"getPermissionWarningsByManifest","successCallbackIndex":1},{"name":"setEnabled","successCallbackIndex":2},{"name":"uninstall","successCallbackIndex":2},{"name":"uninstallSelf","successCallbackIndex":1},{"name":"launchApp","successCallbackIndex":1},{"name":"createAppShortcut","successCallbackIndex":1},{"name":"setLaunchType","successCallbackIndex":2},{"name":"generateAppForLink","successCallbackIndex":2}],"events":["onInstalled","onUninstalled","onEnabled","onDisabled"]},"notifications":{"functions":[{"name":"create","successCallbackIndex":2},{"name":"update","successCallbackIndex":2},{"name":"clear","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":0},{"name":"getPermissionLevel","successCallbackIndex":0}],"events":["onClosed","onClicked","onButtonClicked","onPermissionLevelChanged","onShowSettings"]},"omnibox":{"functions":[{"name":"sendSuggestions"},{"name":"setDefaultSuggestion"}],"events":["onInputStarted","onInputChanged","onInputEntered","onInputCancelled"]},"pageAction":{"functions":[{"name":"show"},{"name":"hide"},{"name":"setTitle"},{"name":"getTitle","successCallbackIndex":1},{"name":"setIcon","successCallbackIndex":1},{"name":"setPopup"},{"name":"getPopup","successCallbackIndex":1}],"events":["onClicked"]},"pageCapture":{"functions":[{"name":"saveAsMHTML","successCallbackIndex":1}],"events":[]},"permissions":{"functions":[{"name":"getAll","successCallbackIndex":0},{"name":"contains","successCallbackIndex":1},{"name":"request","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1}],"events":["onAdded","onRemoved"]},"power":{"functions":[{"name":"requestKeepAwake"},{"name":"releaseKeepAwake"}],"events":[]},"privacy":{"functions":[],"events":[],"properties":{"network":{"container":true,"properties":{"networkPredictionEnabled":{"class":"types.ChromeSetting"},"webRTCMultipleRoutesEnabled":{"class":"types.ChromeSetting"}}},"services":{"container":true,"properties":{"alternateErrorPagesEnabled":{"class":"types.ChromeSetting"},"autofillEnabled":{"class":"types.ChromeSetting"},"hotwordSearchEnabled":{"class":"types.ChromeSetting"},"passwordSavingEnabled":{"class":"types.ChromeSetting"},"safeBrowsingEnabled":{"class":"types.ChromeSetting"},"safeBrowsingExtendedReportingEnabled":{"class":"types.ChromeSetting"},"searchSuggestEnabled":{"class":"types.ChromeSetting"},"spellingServiceEnabled":{"class":"types.ChromeSetting"},"translationServiceEnabled":{"class":"types.ChromeSetting"}}},"websites":{"container":true,"properties":{"thirdPartyCookiesAllowed":{"class":"types.ChromeSetting"},"hyperlinkAuditingEnabled":{"class":"types.ChromeSetting"},"referrersEnabled":{"class":"types.ChromeSetting"},"protectedContentEnabled":{"class":"types.ChromeSetting"}}}}},"proxy":{"functions":[],"events":["onProxyError"],"properties":{"settings":{"class":"types.ChromeSetting"}}},"runtime":{"functions":[{"name":"getBackgroundPage","successCallbackIndex":0},{"name":"openOptionsPage","successCallbackIndex":0},{"name":"getManifest"},{"name":"getURL"},{"name":"setUninstallURL"},{"name":"reload"},{"name":"requestUpdateCheck","successCallbackIndex":0},{"name":"restart"},{"name":"connect"},{"name":"connectNative"},{"name":"sendMessage"},{"name":"sendNativeMessage"},{"name":"getPlatformInfo","successCallbackIndex":0},{"name":"getPackageDirectoryEntry","successCallbackIndex":0}],"events":["onStartup","onInstalled","onSuspend","onSuspendCanceled","onUpdateAvailable","onBrowserUpdateAvailable","onConnect","onConnectExternal","onMessage","onMessageExternal","onRestartRequired"],"properties":{"lastError":{"getter":true,"properties":{"message":{"getter":true}}},"id":{"getter":true}}},"sessions":{"functions":[{"name":"getRecentlyClosed","successCallbackIndex":1},{"name":"getDevices","successCallbackIndex":1},{"name":"restore","successCallbackIndex":1}],"events":["onChanged"],"properties":{"MAX_SESSION_RESULTS":{"value":25}}},"storage":{"functions":[],"events":["onChanged"],"types":{"StorageArea":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getBytesInUse","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1},{"name":"clear","successCallbackIndex":0}],"events":[]}},"properties":{"sync":{"class":"StorageArea","properties":{"QUOTA_BYTES":{"value":102400},"QUOTA_BYTES_PER_ITEM":{"value":8192},"MAX_ITEMS":{"value":512},"MAX_WRITE_OPERATIONS_PER_HOUR":{"value":1800},"MAX_WRITE_OPERATIONS_PER_MINUTE":{"value":120},"MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE":{"value":1000000}}},"local":{"class":"StorageArea","properties":{"QUOTA_BYTES":{"value":5242880}}},"managed":{"class":"StorageArea"}}},"system.cpu":{"functions":[{"name":"getInfo","successCallbackIndex":0}],"events":[]},"system.memory":{"functions":[{"name":"getInfo","successCallbackIndex":0}],"events":[]},"system.storage":{"functions":[{"name":"getInfo","successCallbackIndex":0},{"name":"ejectDevice","successCallbackIndex":1},{"name":"getAvailableCapacity","successCallbackIndex":1}],"events":["onAttached","onDetached"]},"tabCapture":{"functions":[{"name":"capture","successCallbackIndex":1},{"name":"getCapturedTabs","successCallbackIndex":0}],"events":["onStatusChanged"]},"tabs":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getCurrent","successCallbackIndex":0},{"name":"connect"},{"name":"sendRequest"},{"name":"sendMessage"},{"name":"getSelected","successCallbackIndex":1},{"name":"getAllInWindow","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"duplicate","successCallbackIndex":1},{"name":"query","successCallbackIndex":1},{"name":"highlight","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"move","successCallbackIndex":2},{"name":"reload","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"detectLanguage","successCallbackIndex":1},{"name":"captureVisibleTab","successCallbackIndex":2},{"name":"executeScript","successCallbackIndex":2},{"name":"insertCSS","successCallbackIndex":2},{"name":"setZoom","successCallbackIndex":2},{"name":"getZoom","successCallbackIndex":1},{"name":"setZoomSettings","successCallbackIndex":2},{"name":"getZoomSettings","successCallbackIndex":1}],"events":["onCreated","onUpdated","onMoved","onSelectionChanged","onActiveChanged","onActivated","onHighlightChanged","onHighlighted","onDetached","onAttached","onRemoved","onReplaced","onZoomChange"]},"topSites":{"functions":[{"name":"get","successCallbackIndex":0}],"events":[]},"tts":{"functions":[{"name":"speak","successCallbackIndex":2},{"name":"stop"},{"name":"pause"},{"name":"resume"},{"name":"isSpeaking","successCallbackIndex":0},{"name":"getVoices","successCallbackIndex":0}],"events":["onEvent"]},"ttsEngine":{"functions":[{"name":"sendTtsEvent"}],"events":["onSpeak","onStop","onPause","onResume"]},"types":{"functions":[],"events":[],"types":{"ChromeSetting":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"clear","successCallbackIndex":1}],"events":["onChange"]}}},"wallpaper":{"functions":[{"name":"setWallpaper","successCallbackIndex":1}],"events":[]},"webNavigation":{"functions":[{"name":"getFrame","successCallbackIndex":1},{"name":"getAllFrames","successCallbackIndex":1}],"events":["onBeforeNavigate","onCommitted","onDOMContentLoaded","onCompleted","onErrorOccurred","onCreatedNavigationTarget","onReferenceFragmentUpdated","onTabReplaced","onHistoryStateUpdated"]},"webRequest":{"functions":[{"name":"handlerBehaviorChanged","successCallbackIndex":0}],"events":["onBeforeRequest","onBeforeSendHeaders","onSendHeaders","onHeadersReceived","onAuthRequired","onResponseStarted","onBeforeRedirect","onCompleted","onErrorOccurred"],"properties":{"MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES":{"value":20}}},"webstore":{"functions":[{"name":"install","successCallbackIndex":1,"failureCallbackIndex":2}],"events":["onInstallStageChanged","onDownloadProgress"]},"windows":{"functions":[{"name":"get","successCallbackIndex":2},{"name":"getCurrent","successCallbackIndex":1},{"name":"getLastFocused","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1}],"events":["onCreated","onRemoved","onFocusChanged"],"properties":{"WINDOW_ID_NONE":{"value":-1},"WINDOW_ID_CURRENT":{"value":-2}}}}
+JETPACK.API_DEFINITIONS = {"alarms":{"functions":[{"name":"create"},{"name":"get","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":0},{"name":"clear","successCallbackIndex":1},{"name":"clearAll","successCallbackIndex":0}],"events":["onAlarm"]},"bookmarks":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getChildren","successCallbackIndex":1},{"name":"getRecent","successCallbackIndex":1},{"name":"getTree","successCallbackIndex":0},{"name":"getSubTree","successCallbackIndex":1},{"name":"search","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"move","successCallbackIndex":2},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"removeTree","successCallbackIndex":1},{"name":"import","successCallbackIndex":0},{"name":"export","successCallbackIndex":0}],"events":["onCreated","onRemoved","onChanged","onMoved","onChildrenReordered","onImportBegan","onImportEnded"],"properties":{"MAX_WRITE_OPERATIONS_PER_HOUR":{"value":1000000},"MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE":{"value":1000000}}},"browserAction":{"functions":[{"name":"setTitle"},{"name":"getTitle","successCallbackIndex":1},{"name":"setIcon","successCallbackIndex":1},{"name":"setPopup"},{"name":"getPopup","successCallbackIndex":1},{"name":"setBadgeText"},{"name":"getBadgeText","successCallbackIndex":1},{"name":"setBadgeBackgroundColor"},{"name":"getBadgeBackgroundColor","successCallbackIndex":1},{"name":"enable"},{"name":"disable"},{"name":"openPopup","successCallbackIndex":0}],"events":["onClicked"]},"browsingData":{"functions":[{"name":"settings","successCallbackIndex":0},{"name":"remove","successCallbackIndex":2},{"name":"removeAppcache","successCallbackIndex":1},{"name":"removeCache","successCallbackIndex":1},{"name":"removeCookies","successCallbackIndex":1},{"name":"removeDownloads","successCallbackIndex":1},{"name":"removeFileSystems","successCallbackIndex":1},{"name":"removeFormData","successCallbackIndex":1},{"name":"removeHistory","successCallbackIndex":1},{"name":"removeIndexedDB","successCallbackIndex":1},{"name":"removeLocalStorage","successCallbackIndex":1},{"name":"removePluginData","successCallbackIndex":1},{"name":"removePasswords","successCallbackIndex":1},{"name":"removeWebSQL","successCallbackIndex":1}],"events":[]},"commands":{"functions":[{"name":"getAll","successCallbackIndex":0}],"events":["onCommand"]},"contentSettings":{"functions":[],"events":[],"types":{"ContentSetting":{"functions":[{"name":"clear","successCallbackIndex":1},{"name":"get","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"getResourceIdentifiers","successCallbackIndex":0}],"events":[]}},"properties":{"cookies":{"class":"ContentSetting"},"images":{"class":"ContentSetting"},"javascript":{"class":"ContentSetting"},"location":{"class":"ContentSetting"},"plugins":{"class":"ContentSetting"},"popups":{"class":"ContentSetting"},"notifications":{"class":"ContentSetting"},"fullscreen":{"class":"ContentSetting"},"mouselock":{"class":"ContentSetting"},"unsandboxedPlugins":{"class":"ContentSetting"},"automaticDownloads":{"class":"ContentSetting"}}},"contextMenus":{"functions":[{"name":"create","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"removeAll","successCallbackIndex":0}],"events":["onClicked"],"properties":{"ACTION_MENU_TOP_LEVEL_LIMIT":{"value":6}}},"cookies":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1},{"name":"getAllCookieStores","successCallbackIndex":0}],"events":["onChanged"]},"debugger":{"functions":[{"name":"attach","successCallbackIndex":2},{"name":"detach","successCallbackIndex":1},{"name":"sendCommand","successCallbackIndex":3},{"name":"getTargets","successCallbackIndex":0}],"events":["onEvent","onDetach"]},"declarativeContent":{"functions":[],"events":["onPageChanged"]},"desktopCapture":{"functions":[{"name":"chooseDesktopMedia","successCallbackIndex":2},{"name":"cancelChooseDesktopMedia"}],"events":[]},"devtools.inspectedWindow":{"functions":[{"name":"eval","successCallbackIndex":2},{"name":"reload"},{"name":"getResources","successCallbackIndex":0}],"events":["onResourceAdded","onResourceContentCommitted"],"properties":{"tabId":{"getter":true}}},"devtools.network":{"functions":[{"name":"getHAR","successCallbackIndex":0}],"events":["onRequestFinished","onNavigated"]},"devtools.panels":{"functions":[{"name":"create","successCallbackIndex":3},{"name":"setOpenResourceHandler","successCallbackIndex":0},{"name":"openResource","successCallbackIndex":2}],"events":[],"types":{"ElementsPanel":{"functions":[{"name":"createSidebarPane","successCallbackIndex":1}],"events":["onSelectionChanged"]},"SourcesPanel":{"functions":[{"name":"createSidebarPane","successCallbackIndex":1}],"events":["onSelectionChanged"]}},"properties":{"elements":{"class":"ElementsPanel"},"sources":{"class":"SourcesPanel"}}},"downloads":{"functions":[{"name":"download","successCallbackIndex":1},{"name":"search","successCallbackIndex":1},{"name":"pause","successCallbackIndex":1},{"name":"resume","successCallbackIndex":1},{"name":"cancel","successCallbackIndex":1},{"name":"getFileIcon","successCallbackIndex":2},{"name":"open"},{"name":"show"},{"name":"showDefaultFolder"},{"name":"erase","successCallbackIndex":1},{"name":"removeFile","successCallbackIndex":1},{"name":"acceptDanger","successCallbackIndex":1},{"name":"drag"},{"name":"setShelfEnabled"}],"events":["onCreated","onErased","onChanged","onDeterminingFilename"]},"events":{"functions":[],"events":[]},"extension":{"functions":[{"name":"sendRequest"},{"name":"getURL"},{"name":"getViews"},{"name":"getBackgroundPage"},{"name":"getExtensionTabs"},{"name":"isAllowedIncognitoAccess","successCallbackIndex":0},{"name":"isAllowedFileSchemeAccess","successCallbackIndex":0},{"name":"setUpdateUrlData"}],"events":["onRequest","onRequestExternal"],"properties":{"lastError":{"getter":true,"properties":{"message":{"getter":true}}},"inIncognitoContext":{"getter":true}}},"extensionTypes":{"functions":[],"events":[]},"fontSettings":{"functions":[{"name":"clearFont","successCallbackIndex":1},{"name":"getFont","successCallbackIndex":1},{"name":"setFont","successCallbackIndex":1},{"name":"getFontList","successCallbackIndex":0},{"name":"clearDefaultFontSize","successCallbackIndex":1},{"name":"getDefaultFontSize","successCallbackIndex":1},{"name":"setDefaultFontSize","successCallbackIndex":1},{"name":"clearDefaultFixedFontSize","successCallbackIndex":1},{"name":"getDefaultFixedFontSize","successCallbackIndex":1},{"name":"setDefaultFixedFontSize","successCallbackIndex":1},{"name":"clearMinimumFontSize","successCallbackIndex":1},{"name":"getMinimumFontSize","successCallbackIndex":1},{"name":"setMinimumFontSize","successCallbackIndex":1}],"events":["onFontChanged","onDefaultFontSizeChanged","onDefaultFixedFontSizeChanged","onMinimumFontSizeChanged"]},"gcm":{"functions":[{"name":"register","successCallbackIndex":1},{"name":"unregister","successCallbackIndex":0},{"name":"send","successCallbackIndex":1}],"events":["onMessage","onMessagesDeleted","onSendError"],"properties":{"MAX_MESSAGE_SIZE":{"value":4096}}},"history":{"functions":[{"name":"search","successCallbackIndex":1},{"name":"getVisits","successCallbackIndex":1},{"name":"addUrl","successCallbackIndex":1},{"name":"deleteUrl","successCallbackIndex":1},{"name":"deleteRange","successCallbackIndex":1},{"name":"deleteAll","successCallbackIndex":0}],"events":["onVisited","onVisitRemoved"]},"i18n":{"functions":[{"name":"getAcceptLanguages","successCallbackIndex":0},{"name":"getMessage"},{"name":"getUILanguage"}],"events":[]},"identity":{"functions":[{"name":"getAccounts","successCallbackIndex":0},{"name":"getAuthToken","successCallbackIndex":1},{"name":"getProfileUserInfo","successCallbackIndex":0},{"name":"removeCachedAuthToken","successCallbackIndex":1},{"name":"launchWebAuthFlow","successCallbackIndex":1},{"name":"getRedirectURL"}],"events":["onSignInChanged"]},"idle":{"functions":[{"name":"queryState","successCallbackIndex":1},{"name":"setDetectionInterval"}],"events":["onStateChanged"]},"management":{"functions":[{"name":"getAll","successCallbackIndex":0},{"name":"get","successCallbackIndex":1},{"name":"getSelf","successCallbackIndex":0},{"name":"getPermissionWarningsById","successCallbackIndex":1},{"name":"getPermissionWarningsByManifest","successCallbackIndex":1},{"name":"setEnabled","successCallbackIndex":2},{"name":"uninstall","successCallbackIndex":2},{"name":"uninstallSelf","successCallbackIndex":1},{"name":"launchApp","successCallbackIndex":1},{"name":"createAppShortcut","successCallbackIndex":1},{"name":"setLaunchType","successCallbackIndex":2},{"name":"generateAppForLink","successCallbackIndex":2}],"events":["onInstalled","onUninstalled","onEnabled","onDisabled"]},"notifications":{"functions":[{"name":"create","successCallbackIndex":2},{"name":"update","successCallbackIndex":2},{"name":"clear","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":0},{"name":"getPermissionLevel","successCallbackIndex":0}],"events":["onClosed","onClicked","onButtonClicked","onPermissionLevelChanged","onShowSettings"]},"omnibox":{"functions":[{"name":"sendSuggestions"},{"name":"setDefaultSuggestion"}],"events":["onInputStarted","onInputChanged","onInputEntered","onInputCancelled"]},"pageAction":{"functions":[{"name":"show"},{"name":"hide"},{"name":"setTitle"},{"name":"getTitle","successCallbackIndex":1},{"name":"setIcon","successCallbackIndex":1},{"name":"setPopup"},{"name":"getPopup","successCallbackIndex":1}],"events":["onClicked"]},"pageCapture":{"functions":[{"name":"saveAsMHTML","successCallbackIndex":1}],"events":[]},"permissions":{"functions":[{"name":"getAll","successCallbackIndex":0},{"name":"contains","successCallbackIndex":1},{"name":"request","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1}],"events":["onAdded","onRemoved"]},"power":{"functions":[{"name":"requestKeepAwake"},{"name":"releaseKeepAwake"}],"events":[]},"privacy":{"functions":[],"events":[],"properties":{"network":{"container":true,"properties":{"networkPredictionEnabled":{"class":"types.ChromeSetting"},"webRTCMultipleRoutesEnabled":{"class":"types.ChromeSetting"}}},"services":{"container":true,"properties":{"alternateErrorPagesEnabled":{"class":"types.ChromeSetting"},"autofillEnabled":{"class":"types.ChromeSetting"},"hotwordSearchEnabled":{"class":"types.ChromeSetting"},"passwordSavingEnabled":{"class":"types.ChromeSetting"},"safeBrowsingEnabled":{"class":"types.ChromeSetting"},"safeBrowsingExtendedReportingEnabled":{"class":"types.ChromeSetting"},"searchSuggestEnabled":{"class":"types.ChromeSetting"},"spellingServiceEnabled":{"class":"types.ChromeSetting"},"translationServiceEnabled":{"class":"types.ChromeSetting"}}},"websites":{"container":true,"properties":{"thirdPartyCookiesAllowed":{"class":"types.ChromeSetting"},"hyperlinkAuditingEnabled":{"class":"types.ChromeSetting"},"referrersEnabled":{"class":"types.ChromeSetting"},"protectedContentEnabled":{"class":"types.ChromeSetting"}}}}},"proxy":{"functions":[],"events":["onProxyError"],"properties":{"settings":{"class":"types.ChromeSetting"}}},"runtime":{"functions":[{"name":"getBackgroundPage","successCallbackIndex":0},{"name":"openOptionsPage","successCallbackIndex":0},{"name":"getManifest"},{"name":"getURL"},{"name":"setUninstallURL"},{"name":"reload"},{"name":"requestUpdateCheck","successCallbackIndex":0},{"name":"restart"},{"name":"connect"},{"name":"connectNative"},{"name":"sendMessage"},{"name":"sendNativeMessage"},{"name":"getPlatformInfo","successCallbackIndex":0},{"name":"getPackageDirectoryEntry","successCallbackIndex":0}],"events":["onStartup","onInstalled","onSuspend","onSuspendCanceled","onUpdateAvailable","onBrowserUpdateAvailable","onConnect","onConnectExternal","onMessage","onMessageExternal","onRestartRequired"],"properties":{"lastError":{"getter":true,"properties":{"message":{"getter":true}}},"id":{"getter":true}}},"sessions":{"functions":[{"name":"getRecentlyClosed","successCallbackIndex":1},{"name":"getDevices","successCallbackIndex":1},{"name":"restore","successCallbackIndex":1}],"events":["onChanged"],"properties":{"MAX_SESSION_RESULTS":{"value":25}}},"storage":{"functions":[],"events":["onChanged"],"types":{"StorageArea":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getBytesInUse","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"remove","successCallbackIndex":1},{"name":"clear","successCallbackIndex":0}],"events":[]}},"properties":{"sync":{"class":"StorageArea","properties":{"QUOTA_BYTES":{"value":102400},"QUOTA_BYTES_PER_ITEM":{"value":8192},"MAX_ITEMS":{"value":512},"MAX_WRITE_OPERATIONS_PER_HOUR":{"value":1800},"MAX_WRITE_OPERATIONS_PER_MINUTE":{"value":120},"MAX_SUSTAINED_WRITE_OPERATIONS_PER_MINUTE":{"value":1000000}}},"local":{"class":"StorageArea","properties":{"QUOTA_BYTES":{"value":5242880}}},"managed":{"class":"StorageArea"}}},"system.cpu":{"functions":[{"name":"getInfo","successCallbackIndex":0}],"events":[]},"system.memory":{"functions":[{"name":"getInfo","successCallbackIndex":0}],"events":[]},"system.storage":{"functions":[{"name":"getInfo","successCallbackIndex":0},{"name":"ejectDevice","successCallbackIndex":1},{"name":"getAvailableCapacity","successCallbackIndex":1}],"events":["onAttached","onDetached"]},"tabCapture":{"functions":[{"name":"capture","successCallbackIndex":1},{"name":"getCapturedTabs","successCallbackIndex":0}],"events":["onStatusChanged"]},"tabs":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"getCurrent","successCallbackIndex":0},{"name":"connect"},{"name":"sendRequest"},{"name":"sendMessage"},{"name":"getSelected","successCallbackIndex":1},{"name":"getAllInWindow","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"duplicate","successCallbackIndex":1},{"name":"query","successCallbackIndex":1},{"name":"highlight","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"move","successCallbackIndex":2},{"name":"reload","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1},{"name":"detectLanguage","successCallbackIndex":1},{"name":"captureVisibleTab","successCallbackIndex":2},{"name":"executeScript","successCallbackIndex":2},{"name":"insertCSS","successCallbackIndex":2},{"name":"setZoom","successCallbackIndex":2},{"name":"getZoom","successCallbackIndex":1},{"name":"setZoomSettings","successCallbackIndex":2},{"name":"getZoomSettings","successCallbackIndex":1}],"events":["onCreated","onUpdated","onMoved","onSelectionChanged","onActiveChanged","onActivated","onHighlightChanged","onHighlighted","onDetached","onAttached","onRemoved","onReplaced","onZoomChange"]},"topSites":{"functions":[{"name":"get","successCallbackIndex":0}],"events":[]},"tts":{"functions":[{"name":"speak","successCallbackIndex":2},{"name":"stop"},{"name":"pause"},{"name":"resume"},{"name":"isSpeaking","successCallbackIndex":0},{"name":"getVoices","successCallbackIndex":0}],"events":["onEvent"]},"ttsEngine":{"functions":[{"name":"sendTtsEvent"}],"events":["onSpeak","onStop","onPause","onResume"]},"types":{"functions":[],"events":[],"types":{"ChromeSetting":{"functions":[{"name":"get","successCallbackIndex":1},{"name":"set","successCallbackIndex":1},{"name":"clear","successCallbackIndex":1}],"events":["onChange"]}}},"wallpaper":{"functions":[{"name":"setWallpaper","successCallbackIndex":1}],"events":[]},"webNavigation":{"functions":[{"name":"getFrame","successCallbackIndex":1},{"name":"getAllFrames","successCallbackIndex":1}],"events":["onBeforeNavigate","onCommitted","onDOMContentLoaded","onCompleted","onErrorOccurred","onCreatedNavigationTarget","onReferenceFragmentUpdated","onTabReplaced","onHistoryStateUpdated"]},"webRequest":{"functions":[{"name":"handlerBehaviorChanged","successCallbackIndex":0}],"events":["onBeforeRequest","onBeforeSendHeaders","onSendHeaders","onHeadersReceived","onAuthRequired","onResponseStarted","onBeforeRedirect","onCompleted","onErrorOccurred"],"properties":{"MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES":{"value":20}}},"webstore":{"functions":[{"name":"install","successCallbackIndex":1,"failureCallbackIndex":2}],"events":["onInstallStageChanged","onDownloadProgress"]},"windows":{"functions":[{"name":"get","successCallbackIndex":2},{"name":"getCurrent","successCallbackIndex":1},{"name":"getLastFocused","successCallbackIndex":1},{"name":"getAll","successCallbackIndex":1},{"name":"create","successCallbackIndex":1},{"name":"update","successCallbackIndex":2},{"name":"remove","successCallbackIndex":1}],"events":["onCreated","onRemoved","onFocusChanged"],"properties":{"WINDOW_ID_NONE":{"value":-1},"WINDOW_ID_CURRENT":{"value":-2}}},"test":{"functions":[{"name":"getConfig","successCallbackIndex":0},{"name":"notifyFail"},{"name":"notifyPass"},{"name":"log"},{"name":"sendMessage","successCallbackIndex":1},{"name":"callbackAdded"},{"name":"runNextTest"},{"name":"fail"},{"name":"succeed"},{"name":"runWithModuleSystem","successCallbackIndex":0},{"name":"assertTrue"},{"name":"assertFalse"},{"name":"assertBool"},{"name":"checkDeepEq"},{"name":"assertEq"},{"name":"assertNoLastError"},{"name":"assertLastError"},{"name":"assertThrows"},{"name":"callback"},{"name":"listenOnce"},{"name":"listenForever"},{"name":"callbackPass"},{"name":"callbackFail"},{"name":"runTests"},{"name":"getApiFeatures"},{"name":"getApiDefinitions"},{"name":"isProcessingUserGesture"},{"name":"runWithUserGesture","successCallbackIndex":0},{"name":"runWithoutUserGesture","successCallbackIndex":0},{"name":"waitForRoundTrip","successCallbackIndex":1},{"name":"setExceptionHandler","successCallbackIndex":0}],"events":["onMessage"]}}
 /**
  * The last piece injected into the content, takes the definition stub
  * from ./definitions/stub.json (stored at self.JETPACK.API_DEFINITIONS)
@@ -226,6 +643,14 @@ function bindFunctions (namespace, functions=[]) {
   functions.forEach(fnDef => {
     let { name: method, successCallbackIndex: success, failureCallbackIndex: failure } = fnDef;
     let name = `${namespace}.${method}`;
+    let custom;
+
+    // Check to see if this function is manually defined
+    if (custom = JETPACK.getCustomDefinition(name)) {
+      exportFunction(custom, ns, { defineAs: method });
+      return;
+    }
+
     exportFunction(JETPACK.RPC.bind(null, { name, success, failure }), ns, { defineAs: method });
   });
 }

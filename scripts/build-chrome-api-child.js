@@ -20,6 +20,7 @@ var CONTENT_SCRIPT_DEST = path.join(__dirname, "..", "data", "chrome-api-child.j
 var SCRIPT_FILES = [
   "utils.js",
   "chrome-api-bridge.js",
+  "test.js",
   "event.js",
 ];
 

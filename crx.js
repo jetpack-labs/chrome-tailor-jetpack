@@ -7,7 +7,8 @@ const contentScripts = require("./manifest-actions/content_scripts");
 const background = require("./manifest-actions/background");
 const browserAction = require("./manifest-actions/browser_action");
 const overrides = require("./manifest-actions/chrome_url_overrides");
-const events = require("sdk/system/events");
+const { events: systemEvents } = require("sdk/system/events");
+const { events } = require("../lib/chrome-api-controller");
 
 function load(options) {
   const rootURI = options.rootURI;
@@ -66,8 +67,9 @@ function load(options) {
   }
 
   return {
+    addon: events,
     unload: function() {
-      events.emit("crx-unload", {
+      systemEvents.emit("crx-unload", {
         subject: {
           name: manifest.name
         }
